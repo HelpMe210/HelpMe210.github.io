@@ -137,7 +137,7 @@
             background-color: #7f8c8d;
         }
 
-        input[type="text"], input[type="number"], select {
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select {
             padding: 8px;
             width: 100%;
             margin: 5px 0 15px 0;
@@ -213,6 +213,12 @@
             padding: 0 20px;
             margin-top: auto;
         }
+
+        /* Admin Controls */
+        #admin-controls {
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -225,7 +231,8 @@
         <button id="login-button">Login</button>
         <div id="login-error" style="color:red;"></div>
     </div>
-    <div id="sidebar">
+
+    <div id="sidebar" style="display:none;">
         <h2>Grade Tracker</h2>
         <div class="button-group">
             <button id="add-class-btn" class="button">Add New Class</button>
@@ -236,10 +243,19 @@
             <button id="export-data-btn" class="button secondary small">Export Data</button>
             <button id="import-data-btn" class="button secondary small">Import Data</button>
             <input type="file" id="import-file-input" accept=".json" style="display:none;">
-	    <button id="logout-button" class="button accent small">Logout</button>
+	        <button id="logout-button" class="button accent small">Logout</button>
+        </div>
+
+        <!-- Admin section: visible only if admin -->
+        <div id="admin-controls">
+            <h3>Admin Controls</h3>
+            <label for="user-select">Select User</label>
+            <select id="user-select"></select>
+            <button id="switch-user-button" class="button">Load Selected User</button>
         </div>
     </div>
-    <div id="content">
+
+    <div id="content" style="display:none;">
         <!-- Dynamic content will be loaded here -->
     </div>
     <footer>
@@ -253,6 +269,7 @@
 
     <script>
         // ===== Firebase Initialization =====
+         // ===== Firebase Initialization =====
        const firebaseConfig = {
   apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
   authDomain: "yof-tracker.firebaseapp.com",
@@ -260,7 +277,7 @@
   storageBucket: "yof-tracker.firebasestorage.app",
   messagingSenderId: "867007397664",
   appId: "1:867007397664:web:9cbccc410443d6581a2145"
-};
+        };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -271,29 +288,79 @@
         let semesters = [];
         let dataLoaded = false;
         let currentUser = null;
+        let isAdmin = false; // Flag to indicate if the current logged-in user is admin
 
         // ===== Authentication Flow =====
-        // Check auth state changes
         auth.onAuthStateChanged(async user => {
             if (user) {
-                // User is signed in
                 currentUser = user;
-                docRef = db.collection('gradeTracker').doc(user.uid);
-                // Hide login, show the app UI
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('sidebar').style.display = 'block';
-                document.getElementById('content').style.display = 'block';
-                await loadDataFromFirestore();
+		console.log("Logged in user UID:", user.uid);
+                // Check if user is admin by querying Firestore `adminInfo/roles` document
+                try {
+                  const rolesDoc = await db.collection('adminInfo').doc('roles').get();
+                  if (rolesDoc.exists) {
+                    const data = rolesDoc.data();
+                    // data.adminUsers should be an array of UIDs
+                    isAdmin = Array.isArray(data.adminUsers) && data.adminUsers.includes(user.uid);
+console.log("isAdmin:", isAdmin);
+                  } else {
+                    isAdmin = false;
+console.log("rolesDoc does not exist, isAdmin: false");
+                  }
+                } catch (err) {
+                  console.error("Error checking admin roles:", err);
+                  isAdmin = false;
+                }
+
+                if (isAdmin) {
+                    // As admin, don't automatically load their own doc. Show admin controls and let them pick a user.
+                    showAdminUI();
+                } else {
+                    // Normal user flow
+                    docRef = db.collection('gradeTracker').doc(user.uid);
+                    document.getElementById('admin-controls').style.display = 'none'; // hide admin controls
+                    await loadDataFromFirestore();
+                    showNormalUserUI();
+                }
             } else {
                 // User is signed out
                 currentUser = null;
                 docRef = null;
-                // Show login, hide app UI
-                document.getElementById('login-container').style.display = 'block';
-                document.getElementById('sidebar').style.display = 'none';
-                document.getElementById('content').style.display = 'none';
+                showLoginUI();
             }
         });
+
+        function showLoginUI() {
+            document.getElementById('login-container').style.display = 'block';
+            document.getElementById('sidebar').style.display = 'none';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('admin-controls').style.display = 'none';
+        }
+
+        function showNormalUserUI() {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('sidebar').style.display = 'block';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        async function showAdminUI() {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('sidebar').style.display = 'block';
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('admin-controls').style.display = 'block';
+
+            // Load all users from gradeTracker
+            const snapshot = await db.collection('gradeTracker').get();
+            const userSelect = document.getElementById('user-select');
+            userSelect.innerHTML = '<option value="">--Select a user--</option>';
+            snapshot.forEach(doc => {
+              const opt = document.createElement('option');
+              opt.value = doc.id;
+              opt.textContent = doc.id;
+              userSelect.appendChild(opt);
+            });
+            // The admin can now pick a user and load their data.
+        }
 
         document.getElementById('login-button').onclick = async function() {
             const email = document.getElementById('login-email').value;
@@ -309,9 +376,23 @@
             await auth.signOut();
         };
 
+        // Admin switching user:
+        document.getElementById('switch-user-button').onclick = async function() {
+          const selectedUserId = document.getElementById('user-select').value;
+	console.log("Selected user:", selectedUserId);
+          if (!selectedUserId) {
+            alert('Please select a user');
+            return;
+          }
+          docRef = db.collection('gradeTracker').doc(selectedUserId);
+          await loadDataFromFirestore();
+        };
+
         // ===== Data Load/Save =====
         async function loadDataFromFirestore() {
+	    console.log("Loading data from docRef:", docRef.path);
             const docSnap = await docRef.get();
+	    console.log("docSnap exists:", docSnap.exists);
             if (docSnap.exists) {
                 const data = docSnap.data();
                 classes = data.classes || [];
@@ -323,7 +404,8 @@
             dataLoaded = true;
             renderClassList();
             if (classes.length > 0) {
-                document.querySelector('#class-list li').classList.add('active');
+                const firstClassLi = document.querySelector('#class-list li');
+                if (firstClassLi) firstClassLi.classList.add('active');
                 renderClassContent(0);
             } else {
                 document.getElementById('content').innerHTML = '';
@@ -331,7 +413,7 @@
         }
 
         async function saveData() {
-            if (!dataLoaded || !currentUser) return; 
+            if (!dataLoaded || !docRef) return; 
             await docRef.set({ classes, semesters });
         }
 
@@ -388,8 +470,8 @@
 
         // ===== Class Functions =====
         function addClass() {
-            const classDiv = document.createElement('div');
-            classDiv.innerHTML = `
+            const content = document.getElementById('content');
+            content.innerHTML = `
                 <section>
                     <h3>Add New Class</h3>
                     <label>Class Name</label>
@@ -398,12 +480,18 @@
                     <input type="number" id="new-class-credits" placeholder="e.g., 1" min="0.1" step="0.1">
                     <div class="button-group">
                         <button class="button" onclick="saveNewClass(this)">Save</button>
-                        <button class="button accent" onclick="this.parentElement.parentElement.remove()">Cancel</button>
+                        <button class="button accent" onclick="renderClassContentOnCancel()">Cancel</button>
                     </div>
                 </section>
             `;
-            document.getElementById('content').innerHTML = '';
-            document.getElementById('content').appendChild(classDiv);
+        }
+
+        function renderClassContentOnCancel() {
+          if (classes.length > 0) {
+              renderClassContent(0);
+          } else {
+              document.getElementById('content').innerHTML = '';
+          }
         }
 
         async function saveNewClass(button) {
@@ -489,7 +577,7 @@
                 <input type="number" placeholder="e.g., 1" min="0" step="1">
                 <div class="button-group">
                     <button class="button" onclick="saveCategory(${classIndex}, this)">Save</button>
-                    <button class="button accent" onclick="this.parentElement.parentElement.remove()">Cancel</button>
+                    <button class="button accent" onclick="renderCategories(${classIndex})">Cancel</button>
                 </div>
             `;
             document.getElementById('category-list').appendChild(categoryDiv);
@@ -643,7 +731,7 @@
                     <input type="text" placeholder="e.g., 18/25">
                     <div class="button-group">
                         <button class="button" onclick="saveAssignment(${classIndex}, this)">Save</button>
-                        <button class="button accent" onclick="this.parentElement.parentElement.remove()">Cancel</button>
+                        <button class="button accent" onclick="renderAssignments(${classIndex})">Cancel</button>
                     </div>
                 </div>
             `;
@@ -754,7 +842,6 @@
 
             const assignmentList = document.getElementById('assignment-list');
             const rows = assignmentList.querySelectorAll('tr');
-            const headerRow = rows[0];
             const assignmentRow = rows[assignmentIndex + 1];
             const newRow = document.createElement('tr');
             const td = document.createElement('td');
