@@ -18,8 +18,9 @@
             --text-color: #2c3e50;
             --light-text-color: #ecf0f1;
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --highlight-excluded: #dfe6e9;
-            --highlight-dropped: #f9e79f;
+            /* More distinct colors for highlights */
+            --highlight-excluded: #b2bec3; /* Grayish */
+            --highlight-dropped: #f1c40f;   /* Bright gold */
         }
 
         body {
@@ -176,12 +177,13 @@
             background-color: #f9f9f9;
         }
 
+        /* More distinct and stable coloring for excluded and dropped */
         .excluded-manual {
-            background-color: var(--highlight-excluded);
+            background-color: var(--highlight-excluded) !important;
         }
 
         .excluded-dropped {
-            background-color: var(--highlight-dropped);
+            background-color: var(--highlight-dropped) !important;
         }
 
         footer {
@@ -223,8 +225,18 @@
             opacity: 0.5;
         }
 
+        /* Show a line only on the currently hovered row */
         .drag-over {
-            border-top: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+        .drag-over::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--primary-color);
+            z-index: 9999;
         }
 
         /* Drag handle */
@@ -236,7 +248,6 @@
             cursor: grabbing;
         }
 
-        /* Make handle column narrower */
         .handle-col {
             width: 30px;
         }
@@ -791,6 +802,9 @@
                 const row = document.createElement('tr');
                 row.dataset.index = index;
                 row.addEventListener('dragover', handleDragOver);
+                row.addEventListener('dragover', (e) => { e.preventDefault(); });
+                row.addEventListener('dragenter', () => row.classList.add('drag-over'));
+                row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
                 row.addEventListener('drop', (e) => handleDrop(e, classIndex));
 
                 const isDropped = isAssignmentDropped(cls, assignment.categoryIndex, index);
@@ -816,7 +830,6 @@
                     </td>
                 `;
 
-                // Add dragstart/end on the handle only
                 const handle = row.querySelector('.drag-handle');
                 handle.addEventListener('dragstart', (e) => handleDragStart(e, row, classIndex));
                 handle.addEventListener('dragend', (e) => handleDragEnd(e, classIndex));
@@ -833,19 +846,13 @@
             row.classList.add('dragging');
         }
 
-        function handleDragOver(event) {
-            event.preventDefault();
-            const targetRow = event.currentTarget;
-            if (targetRow && targetRow.nodeName === 'TR') {
-                targetRow.classList.add('drag-over');
-            }
-        }
-
         function handleDrop(event, classIndex) {
             event.preventDefault();
             const cls = classes[classIndex];
             const fromIndex = draggedRowIndex;
             const toIndex = parseInt(event.currentTarget.dataset.index, 10);
+
+            // Remove the drag-over class from the target row
             event.currentTarget.classList.remove('drag-over');
 
             if (fromIndex === toIndex) return;
@@ -860,10 +867,12 @@
         }
 
         async function handleDragEnd(event, classIndex) {
-            const rows = event.currentTarget.closest('table').querySelectorAll('tr');
+            const table = event.currentTarget.closest('table');
+            const rows = table.querySelectorAll('tr');
             rows.forEach((row) => row.classList.remove('dragging', 'drag-over'));
 
             await saveData();
+            // Re-render after drag end to update statuses if needed
             renderAssignments(classIndex);
             calculateGrade(classIndex);
             draggedRowIndex = null;
@@ -1145,11 +1154,11 @@
 
             const output = document.getElementById('needed-score-output');
             if (neededScore > 100) {
-                output.innerHTML = `<p>You need ${neededScore}% on your ${cls.categories[cls.finalCategoryIndex].name} to achieve a final grade of ${desiredGrade}%. This is not possible.</p>`;
+                output.innerHTML = `<p>You need ${neededScore}% on your ${cls.categories[cls.finalCategoryIndex].name} to achieve ${desiredGrade}%. This is not possible.</p>`;
             } else if (neededScore < 0) {
-                output.innerHTML = `<p>You have already secured a final grade of ${desiredGrade}% or higher!</p>`;
+                output.innerHTML = `<p>You have already secured ${desiredGrade}% or higher!</p>`;
             } else {
-                output.innerHTML = `<p>You need to score ${neededScore}% (${neededLetterGrade}) on your ${cls.categories[cls.finalCategoryIndex].name} to achieve a final grade of ${desiredGrade}%.</p>`;
+                output.innerHTML = `<p>You need to score ${neededScore}% (${neededLetterGrade}) on your ${cls.categories[cls.finalCategoryIndex].name} to achieve ${desiredGrade}%.</p>`;
             }
         }
 
