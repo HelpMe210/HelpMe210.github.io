@@ -18,8 +18,8 @@
             --text-color: #2c3e50;
             --light-text-color: #ecf0f1;
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --highlight-excluded: #b2bec3; /* Grayish for excluded */
-            --highlight-dropped: #f1c40f;  /* Bright gold for dropped */
+            --highlight-excluded: #b2bec3; 
+            --highlight-dropped: #f1c40f; 
         }
 
         body {
@@ -176,7 +176,6 @@
             background-color: #f9f9f9;
         }
 
-        /* Simple, stable highlighting for excluded/dropped */
         .excluded-manual {
             background-color: var(--highlight-excluded) !important;
         }
@@ -219,15 +218,15 @@
             display: none;
         }
 
-        /* Drag-and-drop feedback */
         .dragging {
             opacity: 0.5;
         }
 
-        /* Show a simple line on the hovered row */
+        /* Blue line on drag-over using a pseudo-element */
         .drag-over {
             position: relative;
         }
+
         .drag-over::before {
             content: "";
             position: absolute;
@@ -238,7 +237,6 @@
             pointer-events: none;
         }
 
-        /* Drag handle */
         .drag-handle {
             cursor: grab;
         }
@@ -286,7 +284,6 @@
     </div>
 
     <div id="content" style="display:none;"></div>
-
     <footer>
         Built by Reuven Sash + ChatGPT
     </footer>
@@ -299,7 +296,7 @@
     <script>
         // ===== Firebase Initialization =====
         const firebaseConfig = {
-           apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
+            apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
   authDomain: "yof-tracker.firebaseapp.com",
   projectId: "yof-tracker",
   storageBucket: "yof-tracker.firebasestorage.app",
@@ -799,14 +796,17 @@
                 const row = document.createElement('tr');
                 row.dataset.index = index;
 
-                // Setup drag events
-                // dragover only prevents default to allow drop
                 row.addEventListener('dragover', (e) => { e.preventDefault(); });
-                // dragenter adds the blue line
-                row.addEventListener('dragenter', () => row.classList.add('drag-over'));
-                // dragleave removes the blue line
-                row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
-                // drop handles the rearranging
+                row.addEventListener('dragenter', (e) => {
+                    if (e.currentTarget === e.target) {
+                        row.classList.add('drag-over');
+                    }
+                });
+                row.addEventListener('dragleave', (e) => {
+                    if (e.currentTarget === e.target) {
+                        row.classList.remove('drag-over');
+                    }
+                });
                 row.addEventListener('drop', (e) => handleDrop(e, classIndex));
 
                 const isDropped = isAssignmentDropped(cls, assignment.categoryIndex, index);
@@ -861,7 +861,6 @@
             const movedItem = cls.assignments.splice(fromIndex, 1)[0];
             cls.assignments.splice(toIndex, 0, movedItem);
 
-            // Update indices
             const rows = event.currentTarget.parentElement.querySelectorAll('tr[data-index]');
             rows.forEach((row, i) => {
                 row.dataset.index = i;
@@ -874,7 +873,6 @@
             rows.forEach((row) => row.classList.remove('dragging', 'drag-over'));
 
             await saveData();
-            // Re-render after drag ends
             renderAssignments(classIndex);
             calculateGrade(classIndex);
             draggedRowIndex = null;
@@ -1005,9 +1003,14 @@
                 }
             });
 
-            const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights).toFixed(2) : 0;
-            const letterGrade = getLetterGrade(finalGrade);
-            const gpaScale = getGPA(finalGrade).toFixed(2);
+            // Don't round finalGrade for calculations
+            const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights) : 0;
+
+            // Round only for letter grade/GPA determination
+            const roundedGrade = Math.round(finalGrade);
+
+            const letterGrade = getLetterGrade(roundedGrade);
+            const gpaScale = getGPA(roundedGrade).toFixed(2);
 
             const gradeSummary = document.getElementById('grade-summary');
             let categoryAverageHTML = '<h4>Category Averages:</h4><ul>';
@@ -1016,20 +1019,19 @@
             }
             categoryAverageHTML += '</ul>';
 
-            const nextGradeInfo = getNextLetterGradeInfo(finalGrade);
+            const nextGradeInfo = getNextLetterGradeInfo(roundedGrade);
 
             gradeSummary.innerHTML = `
-                <p>Your current grade is: <strong>${finalGrade}% (${letterGrade}, GPA: ${gpaScale})</strong></p>
+                <p>Your current grade is: <strong>${roundedGrade}% (${letterGrade}, GPA: ${gpaScale})</strong></p>
                 ${categoryAverageHTML}
                 <p>${nextGradeInfo}</p>
             `;
 
-            renderFinalGradeCalculator(classIndex, finalGrade);
+            renderFinalGradeCalculator(classIndex, roundedGrade);
             renderAssignmentStatistics(classIndex);
         }
 
         function getLetterGrade(percentage) {
-            percentage = Number(percentage);
             if (percentage >= 97) return 'A+';
             if (percentage >= 93) return 'A';
             if (percentage >= 90) return 'A-';
@@ -1151,7 +1153,9 @@
                 return;
             }
 
-            const neededScore = ((desiredGrade - (accumulatedScore / 100)) / (finalCategoryWeight / 100)).toFixed(2);
+            const neededScoreExact = ((desiredGrade - (accumulatedScore / 100)) / (finalCategoryWeight / 100));
+            const neededScore = Math.round(neededScoreExact);
+
             const neededLetterGrade = getLetterGrade(neededScore);
 
             const output = document.getElementById('needed-score-output');
@@ -1423,10 +1427,10 @@
             calculateCumulativeGPA();
         }
 
-        async function deleteClassInSemester(sIndex) {
+        async function deleteClassInSemester(sIndex, cIndex) {
             if (confirm('Are you sure you want to delete this class?')) {
                 const semester = semesters[sIndex];
-                semester.classes.splice(sIndex, 1);
+                semester.classes.splice(cIndex, 1);
                 await saveData();
                 renderClassesInSemester(sIndex);
                 calculateCumulativeGPA();
@@ -1499,15 +1503,17 @@
                         }
                     });
 
-                    const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights).toFixed(2) : 0;
-                    const gpa = getGPA(finalGrade);
-                    const letterGrade = getLetterGrade(finalGrade);
+                    let finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights) : 0;
+                    const roundedGrade = Math.round(finalGrade);
+
+                    const gpa = getGPA(roundedGrade);
+                    const letterGrade = getLetterGrade(roundedGrade);
                     currentSemesterQualityPoints += gpa * cls.credits;
                     currentSemesterCredits += cls.credits;
-                    currentSemesterPercentagePoints += finalGrade * cls.credits;
+                    currentSemesterPercentagePoints += roundedGrade * cls.credits;
 
                     cumulativeGPADiv.innerHTML += `
-                        <p><strong>${cls.name}</strong>: ${letterGrade} (${finalGrade}%, GPA: ${gpa.toFixed(2)}, Credits: ${cls.credits})</p>
+                        <p><strong>${cls.name}</strong>: ${letterGrade} (${roundedGrade}%, GPA: ${gpa.toFixed(2)}, Credits: ${cls.credits})</p>
                     `;
                 });
 
@@ -1532,7 +1538,6 @@
         }
 
         function getGPA(percentage) {
-            percentage = Number(percentage);
             if (percentage >= 97) return 4.0;
             if (percentage >= 93) return 3.7;
             if (percentage >= 90) return 3.3;
