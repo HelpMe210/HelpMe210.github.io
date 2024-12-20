@@ -18,8 +18,8 @@
             --text-color: #2c3e50;
             --light-text-color: #ecf0f1;
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --highlight-excluded: #b2bec3; 
-            --highlight-dropped: #f1c40f; 
+            --highlight-excluded: #dfe6e9; /* Slightly grayish */
+            --highlight-dropped: #f9e79f;   /* A distinct yellow */
         }
 
         body {
@@ -176,6 +176,7 @@
             background-color: #f9f9f9;
         }
 
+        /* Improved highlighting for excluded and dropped assignments */
         .excluded-manual {
             background-color: var(--highlight-excluded) !important;
         }
@@ -218,11 +219,12 @@
             display: none;
         }
 
+        /* Drag-and-drop feedback */
         .dragging {
             opacity: 0.5;
         }
 
-        /* Blue line on drag-over using a pseudo-element */
+        /* Only show the drop line on the current hovered row */
         .drag-over {
             position: relative;
         }
@@ -234,9 +236,9 @@
             height: 2px;
             background: var(--primary-color);
             z-index: 9999;
-            pointer-events: none;
         }
 
+        /* Drag handle */
         .drag-handle {
             cursor: grab;
         }
@@ -284,6 +286,7 @@
     </div>
 
     <div id="content" style="display:none;"></div>
+
     <footer>
         Built by Reuven Sash + ChatGPT
     </footer>
@@ -296,13 +299,15 @@
     <script>
         // ===== Firebase Initialization =====
         const firebaseConfig = {
-            apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
+           apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
   authDomain: "yof-tracker.firebaseapp.com",
   projectId: "yof-tracker",
   storageBucket: "yof-tracker.firebasestorage.app",
   messagingSenderId: "867007397664",
   appId: "1:867007397664:web:9cbccc410443d6581a2145"
         };
+
+        // Replace above with your actual Firebase config.
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -795,18 +800,7 @@
                 const percentage = ((assignment.score / assignment.total) * 100).toFixed(2) + '%';
                 const row = document.createElement('tr');
                 row.dataset.index = index;
-
-                row.addEventListener('dragover', (e) => { e.preventDefault(); });
-                row.addEventListener('dragenter', (e) => {
-                    if (e.currentTarget === e.target) {
-                        row.classList.add('drag-over');
-                    }
-                });
-                row.addEventListener('dragleave', (e) => {
-                    if (e.currentTarget === e.target) {
-                        row.classList.remove('drag-over');
-                    }
-                });
+                row.addEventListener('dragover', handleDragOver);
                 row.addEventListener('drop', (e) => handleDrop(e, classIndex));
 
                 const isDropped = isAssignmentDropped(cls, assignment.categoryIndex, index);
@@ -848,12 +842,23 @@
             row.classList.add('dragging');
         }
 
+        function handleDragOver(event) {
+            event.preventDefault();
+            const table = event.currentTarget.closest('table');
+            const rows = table.querySelectorAll('tr[data-index]');
+            rows.forEach(row => row.classList.remove('drag-over'));
+
+            const targetRow = event.currentTarget;
+            if (targetRow && targetRow.nodeName === 'TR') {
+                targetRow.classList.add('drag-over');
+            }
+        }
+
         function handleDrop(event, classIndex) {
             event.preventDefault();
             const cls = classes[classIndex];
             const fromIndex = draggedRowIndex;
             const toIndex = parseInt(event.currentTarget.dataset.index, 10);
-
             event.currentTarget.classList.remove('drag-over');
 
             if (fromIndex === toIndex) return;
@@ -1003,14 +1008,9 @@
                 }
             });
 
-            // Don't round finalGrade for calculations
-            const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights) : 0;
-
-            // Round only for letter grade/GPA determination
-            const roundedGrade = Math.round(finalGrade);
-
-            const letterGrade = getLetterGrade(roundedGrade);
-            const gpaScale = getGPA(roundedGrade).toFixed(2);
+            const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights).toFixed(2) : 0;
+            const letterGrade = getLetterGrade(finalGrade);
+            const gpaScale = getGPA(finalGrade).toFixed(2);
 
             const gradeSummary = document.getElementById('grade-summary');
             let categoryAverageHTML = '<h4>Category Averages:</h4><ul>';
@@ -1019,19 +1019,20 @@
             }
             categoryAverageHTML += '</ul>';
 
-            const nextGradeInfo = getNextLetterGradeInfo(roundedGrade);
+            const nextGradeInfo = getNextLetterGradeInfo(finalGrade);
 
             gradeSummary.innerHTML = `
-                <p>Your current grade is: <strong>${roundedGrade}% (${letterGrade}, GPA: ${gpaScale})</strong></p>
+                <p>Your current grade is: <strong>${finalGrade}% (${letterGrade}, GPA: ${gpaScale})</strong></p>
                 ${categoryAverageHTML}
                 <p>${nextGradeInfo}</p>
             `;
 
-            renderFinalGradeCalculator(classIndex, roundedGrade);
+            renderFinalGradeCalculator(classIndex, finalGrade);
             renderAssignmentStatistics(classIndex);
         }
 
         function getLetterGrade(percentage) {
+            percentage = Number(percentage);
             if (percentage >= 97) return 'A+';
             if (percentage >= 93) return 'A';
             if (percentage >= 90) return 'A-';
@@ -1153,18 +1154,16 @@
                 return;
             }
 
-            const neededScoreExact = ((desiredGrade - (accumulatedScore / 100)) / (finalCategoryWeight / 100));
-            const neededScore = Math.round(neededScoreExact);
-
+            const neededScore = ((desiredGrade - (accumulatedScore / 100)) / (finalCategoryWeight / 100)).toFixed(2);
             const neededLetterGrade = getLetterGrade(neededScore);
 
             const output = document.getElementById('needed-score-output');
             if (neededScore > 100) {
-                output.innerHTML = `<p>You need ${neededScore}% on your ${cls.categories[cls.finalCategoryIndex].name} to achieve ${desiredGrade}%. This is not possible.</p>`;
+                output.innerHTML = `<p>You need ${neededScore}% on your ${cls.categories[cls.finalCategoryIndex].name} to achieve a final grade of ${desiredGrade}%. This is not possible.</p>`;
             } else if (neededScore < 0) {
-                output.innerHTML = `<p>You have already secured ${desiredGrade}% or higher!</p>`;
+                output.innerHTML = `<p>You have already secured a final grade of ${desiredGrade}% or higher!</p>`;
             } else {
-                output.innerHTML = `<p>You need to score ${neededScore}% (${neededLetterGrade}) on your ${cls.categories[cls.finalCategoryIndex].name} to achieve ${desiredGrade}%.</p>`;
+                output.innerHTML = `<p>You need to score ${neededScore}% (${neededLetterGrade}) on your ${cls.categories[cls.finalCategoryIndex].name} to achieve a final grade of ${desiredGrade}%.</p>`;
             }
         }
 
@@ -1503,17 +1502,15 @@
                         }
                     });
 
-                    let finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights) : 0;
-                    const roundedGrade = Math.round(finalGrade);
-
-                    const gpa = getGPA(roundedGrade);
-                    const letterGrade = getLetterGrade(roundedGrade);
+                    const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights).toFixed(2) : 0;
+                    const gpa = getGPA(finalGrade);
+                    const letterGrade = getLetterGrade(finalGrade);
                     currentSemesterQualityPoints += gpa * cls.credits;
                     currentSemesterCredits += cls.credits;
-                    currentSemesterPercentagePoints += roundedGrade * cls.credits;
+                    currentSemesterPercentagePoints += finalGrade * cls.credits;
 
                     cumulativeGPADiv.innerHTML += `
-                        <p><strong>${cls.name}</strong>: ${letterGrade} (${roundedGrade}%, GPA: ${gpa.toFixed(2)}, Credits: ${cls.credits})</p>
+                        <p><strong>${cls.name}</strong>: ${letterGrade} (${finalGrade}%, GPA: ${gpa.toFixed(2)}, Credits: ${cls.credits})</p>
                     `;
                 });
 
@@ -1538,6 +1535,7 @@
         }
 
         function getGPA(percentage) {
+            percentage = Number(percentage);
             if (percentage >= 97) return 4.0;
             if (percentage >= 93) return 3.7;
             if (percentage >= 90) return 3.3;
