@@ -18,9 +18,8 @@
             --text-color: #2c3e50;
             --light-text-color: #ecf0f1;
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* More distinct colors for highlights */
-            --highlight-excluded: #b2bec3; /* Grayish */
-            --highlight-dropped: #f1c40f;   /* Bright gold */
+            --highlight-excluded: #b2bec3; /* Grayish for excluded */
+            --highlight-dropped: #f1c40f;  /* Bright gold for dropped */
         }
 
         body {
@@ -177,7 +176,7 @@
             background-color: #f9f9f9;
         }
 
-        /* More distinct and stable coloring for excluded and dropped */
+        /* Simple, stable highlighting for excluded/dropped */
         .excluded-manual {
             background-color: var(--highlight-excluded) !important;
         }
@@ -225,11 +224,10 @@
             opacity: 0.5;
         }
 
-        /* Show a line only on the currently hovered row */
+        /* Show a simple line on the hovered row */
         .drag-over {
             position: relative;
         }
-
         .drag-over::before {
             content: "";
             position: absolute;
@@ -237,6 +235,7 @@
             height: 2px;
             background: var(--primary-color);
             z-index: 9999;
+            pointer-events: none;
         }
 
         /* Drag handle */
@@ -300,7 +299,7 @@
     <script>
         // ===== Firebase Initialization =====
         const firebaseConfig = {
-            apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
+           apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
   authDomain: "yof-tracker.firebaseapp.com",
   projectId: "yof-tracker",
   storageBucket: "yof-tracker.firebasestorage.app",
@@ -800,10 +799,14 @@
                 const row = document.createElement('tr');
                 row.dataset.index = index;
 
-                // Use dragenter/dragleave for highlighting current drop target
+                // Setup drag events
+                // dragover only prevents default to allow drop
                 row.addEventListener('dragover', (e) => { e.preventDefault(); });
+                // dragenter adds the blue line
                 row.addEventListener('dragenter', () => row.classList.add('drag-over'));
+                // dragleave removes the blue line
                 row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+                // drop handles the rearranging
                 row.addEventListener('drop', (e) => handleDrop(e, classIndex));
 
                 const isDropped = isAssignmentDropped(cls, assignment.categoryIndex, index);
@@ -851,7 +854,6 @@
             const fromIndex = draggedRowIndex;
             const toIndex = parseInt(event.currentTarget.dataset.index, 10);
 
-            // Remove the drag-over class from the target row
             event.currentTarget.classList.remove('drag-over');
 
             if (fromIndex === toIndex) return;
@@ -859,6 +861,7 @@
             const movedItem = cls.assignments.splice(fromIndex, 1)[0];
             cls.assignments.splice(toIndex, 0, movedItem);
 
+            // Update indices
             const rows = event.currentTarget.parentElement.querySelectorAll('tr[data-index]');
             rows.forEach((row, i) => {
                 row.dataset.index = i;
@@ -871,7 +874,7 @@
             rows.forEach((row) => row.classList.remove('dragging', 'drag-over'));
 
             await saveData();
-            // Re-render after drag end to update statuses if needed
+            // Re-render after drag ends
             renderAssignments(classIndex);
             calculateGrade(classIndex);
             draggedRowIndex = null;
@@ -1420,10 +1423,10 @@
             calculateCumulativeGPA();
         }
 
-        async function deleteClassInSemester(sIndex, cIndex) {
+        async function deleteClassInSemester(sIndex) {
             if (confirm('Are you sure you want to delete this class?')) {
                 const semester = semesters[sIndex];
-                semester.classes.splice(cIndex, 1);
+                semester.classes.splice(sIndex, 1);
                 await saveData();
                 renderClassesInSemester(sIndex);
                 calculateCumulativeGPA();
