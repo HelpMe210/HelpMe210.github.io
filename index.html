@@ -308,8 +308,6 @@
   appId: "1:867007397664:web:9cbccc410443d6581a2145"
         };
 
-        // Replace the above config with your Firebase project's config.
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
@@ -801,7 +799,8 @@
                 const percentage = ((assignment.score / assignment.total) * 100).toFixed(2) + '%';
                 const row = document.createElement('tr');
                 row.dataset.index = index;
-                row.addEventListener('dragover', handleDragOver);
+
+                // Use dragenter/dragleave for highlighting current drop target
                 row.addEventListener('dragover', (e) => { e.preventDefault(); });
                 row.addEventListener('dragenter', () => row.classList.add('drag-over'));
                 row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
