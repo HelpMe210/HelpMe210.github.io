@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Grade Tracker</title>
     <style>
-        /* (Same styles as before) */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -214,10 +213,32 @@
             margin-top: auto;
         }
 
-        /* Admin Controls */
         #admin-controls {
             margin-top: 20px;
             display: none;
+        }
+
+        /* Drag-and-drop feedback */
+        .dragging {
+            opacity: 0.5;
+        }
+
+        .drag-over {
+            border-top: 2px solid var(--primary-color);
+        }
+
+        /* Drag handle */
+        .drag-handle {
+            cursor: grab;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* Make handle column narrower */
+        .handle-col {
+            width: 30px;
         }
     </style>
 </head>
@@ -243,10 +264,9 @@
             <button id="export-data-btn" class="button secondary small">Export Data</button>
             <button id="import-data-btn" class="button secondary small">Import Data</button>
             <input type="file" id="import-file-input" accept=".json" style="display:none;">
-	        <button id="logout-button" class="button accent small">Logout</button>
+            <button id="logout-button" class="button accent small">Logout</button>
         </div>
 
-        <!-- Admin section: visible only if admin -->
         <div id="admin-controls">
             <h3>Admin Controls</h3>
             <label for="user-select">Select User</label>
@@ -255,9 +275,8 @@
         </div>
     </div>
 
-    <div id="content" style="display:none;">
-        <!-- Dynamic content will be loaded here -->
-    </div>
+    <div id="content" style="display:none;"></div>
+
     <footer>
         Built by Reuven Sash + ChatGPT
     </footer>
@@ -269,15 +288,16 @@
 
     <script>
         // ===== Firebase Initialization =====
-         // ===== Firebase Initialization =====
-       const firebaseConfig = {
-  apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
+        const firebaseConfig = {
+            apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
   authDomain: "yof-tracker.firebaseapp.com",
   projectId: "yof-tracker",
   storageBucket: "yof-tracker.firebasestorage.app",
   messagingSenderId: "867007397664",
   appId: "1:867007397664:web:9cbccc410443d6581a2145"
         };
+
+        // Replace the above config with your Firebase project's config.
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -288,42 +308,33 @@
         let semesters = [];
         let dataLoaded = false;
         let currentUser = null;
-        let isAdmin = false; // Flag to indicate if the current logged-in user is admin
+        let isAdmin = false;
 
-        // ===== Authentication Flow =====
         auth.onAuthStateChanged(async user => {
             if (user) {
                 currentUser = user;
-		console.log("Logged in user UID:", user.uid);
-                // Check if user is admin by querying Firestore `adminInfo/roles` document
                 try {
-                  const rolesDoc = await db.collection('adminInfo').doc('roles').get();
-                  if (rolesDoc.exists) {
-                    const data = rolesDoc.data();
-                    // data.adminUsers should be an array of UIDs
-                    isAdmin = Array.isArray(data.adminUsers) && data.adminUsers.includes(user.uid);
-console.log("isAdmin:", isAdmin);
-                  } else {
-                    isAdmin = false;
-console.log("rolesDoc does not exist, isAdmin: false");
-                  }
+                    const rolesDoc = await db.collection('adminInfo').doc('roles').get();
+                    if (rolesDoc.exists) {
+                        const data = rolesDoc.data();
+                        isAdmin = Array.isArray(data.adminUsers) && data.adminUsers.includes(user.uid);
+                    } else {
+                        isAdmin = false;
+                    }
                 } catch (err) {
-                  console.error("Error checking admin roles:", err);
-                  isAdmin = false;
+                    console.error("Error checking admin roles:", err);
+                    isAdmin = false;
                 }
 
                 if (isAdmin) {
-                    // As admin, don't automatically load their own doc. Show admin controls and let them pick a user.
                     showAdminUI();
                 } else {
-                    // Normal user flow
                     docRef = db.collection('gradeTracker').doc(user.uid);
-                    document.getElementById('admin-controls').style.display = 'none'; // hide admin controls
+                    document.getElementById('admin-controls').style.display = 'none';
                     await loadDataFromFirestore();
                     showNormalUserUI();
                 }
             } else {
-                // User is signed out
                 currentUser = null;
                 docRef = null;
                 showLoginUI();
@@ -349,17 +360,15 @@ console.log("rolesDoc does not exist, isAdmin: false");
             document.getElementById('content').style.display = 'block';
             document.getElementById('admin-controls').style.display = 'block';
 
-            // Load all users from gradeTracker
             const snapshot = await db.collection('gradeTracker').get();
             const userSelect = document.getElementById('user-select');
             userSelect.innerHTML = '<option value="">--Select a user--</option>';
             snapshot.forEach(doc => {
-              const opt = document.createElement('option');
-              opt.value = doc.id;
-              opt.textContent = doc.id;
-              userSelect.appendChild(opt);
+                const opt = document.createElement('option');
+                opt.value = doc.id;
+                opt.textContent = doc.id;
+                userSelect.appendChild(opt);
             });
-            // The admin can now pick a user and load their data.
         }
 
         document.getElementById('login-button').onclick = async function() {
@@ -376,23 +385,18 @@ console.log("rolesDoc does not exist, isAdmin: false");
             await auth.signOut();
         };
 
-        // Admin switching user:
         document.getElementById('switch-user-button').onclick = async function() {
-          const selectedUserId = document.getElementById('user-select').value;
-	console.log("Selected user:", selectedUserId);
-          if (!selectedUserId) {
-            alert('Please select a user');
-            return;
-          }
-          docRef = db.collection('gradeTracker').doc(selectedUserId);
-          await loadDataFromFirestore();
+            const selectedUserId = document.getElementById('user-select').value;
+            if (!selectedUserId) {
+                alert('Please select a user');
+                return;
+            }
+            docRef = db.collection('gradeTracker').doc(selectedUserId);
+            await loadDataFromFirestore();
         };
 
-        // ===== Data Load/Save =====
         async function loadDataFromFirestore() {
-	    console.log("Loading data from docRef:", docRef.path);
             const docSnap = await docRef.get();
-	    console.log("docSnap exists:", docSnap.exists);
             if (docSnap.exists) {
                 const data = docSnap.data();
                 classes = data.classes || [];
@@ -417,7 +421,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             await docRef.set({ classes, semesters });
         }
 
-        // ===== Render Class List =====
         function renderClassList() {
             const classList = document.getElementById('class-list');
             classList.innerHTML = '';
@@ -433,7 +436,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             });
         }
 
-        // ===== Render Class Content =====
         function renderClassContent(classIndex) {
             const content = document.getElementById('content');
             const cls = classes[classIndex];
@@ -468,7 +470,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             calculateGrade(classIndex);
         }
 
-        // ===== Class Functions =====
         function addClass() {
             const content = document.getElementById('content');
             content.innerHTML = `
@@ -502,7 +503,7 @@ console.log("rolesDoc does not exist, isAdmin: false");
                 return;
             }
             if (isNaN(classCredits) || classCredits <= 0) {
-                classCredits = 1; // Default to 1 credit
+                classCredits = 1; 
             }
             classes.push({
                 name: className,
@@ -513,7 +514,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             });
             await saveData();
             renderClassList();
-            // Auto-open the new class
             const newIndex = classes.length - 1;
             document.querySelectorAll('#class-list li').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('#class-list li')[newIndex].classList.add('active');
@@ -545,7 +545,7 @@ console.log("rolesDoc does not exist, isAdmin: false");
                 return;
             }
             if (isNaN(newCredits) || newCredits <= 0) {
-                newCredits = 1; // Default to 1 credit
+                newCredits = 1; 
             }
             cls.name = newName;
             cls.credits = newCredits;
@@ -563,11 +563,9 @@ console.log("rolesDoc does not exist, isAdmin: false");
             }
         }
 
-        // ===== Category Functions =====
         function addCategory(classIndex) {
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'category';
-
             categoryDiv.innerHTML = `
                 <label>Category Name</label>
                 <input type="text" placeholder="e.g., Quizzes">
@@ -711,7 +709,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             }
         }
 
-        // ===== Assignment Functions =====
         function addAssignment(classIndex) {
             const cls = classes[classIndex];
             if (cls.categories.length === 0) {
@@ -765,6 +762,8 @@ console.log("rolesDoc does not exist, isAdmin: false");
             calculateGrade(classIndex);
         }
 
+        let draggedRowIndex = null;
+
         function renderAssignments(classIndex) {
             const cls = classes[classIndex];
             const assignmentList = document.getElementById('assignment-list');
@@ -773,9 +772,11 @@ console.log("rolesDoc does not exist, isAdmin: false");
                 assignmentList.innerHTML = '<p>No assignments added yet.</p>';
                 return;
             }
+
             const table = document.createElement('table');
             table.innerHTML = `
                 <tr>
+                    <th class="handle-col"></th>
                     <th>Name</th>
                     <th>Category</th>
                     <th>Score</th>
@@ -788,6 +789,10 @@ console.log("rolesDoc does not exist, isAdmin: false");
                 const catName = cls.categories[assignment.categoryIndex].name;
                 const percentage = ((assignment.score / assignment.total) * 100).toFixed(2) + '%';
                 const row = document.createElement('tr');
+                row.dataset.index = index;
+                row.addEventListener('dragover', handleDragOver);
+                row.addEventListener('drop', (e) => handleDrop(e, classIndex));
+
                 const isDropped = isAssignmentDropped(cls, assignment.categoryIndex, index);
                 let statusLabel = '';
                 if (assignment.exclude) {
@@ -797,7 +802,9 @@ console.log("rolesDoc does not exist, isAdmin: false");
                     row.classList.add('excluded-dropped');
                     statusLabel = '<em>(Dropped)</em>';
                 }
+
                 row.innerHTML = `
+                    <td><span class="drag-handle" draggable="true">⋮⋮⋮</span></td>
                     <td>${assignment.name} ${statusLabel}</td>
                     <td>${catName}</td>
                     <td>${assignment.score}</td>
@@ -808,9 +815,58 @@ console.log("rolesDoc does not exist, isAdmin: false");
                         <button class="button accent small" onclick="deleteAssignment(${classIndex}, ${index})">Delete</button>
                     </td>
                 `;
+
+                // Add dragstart/end on the handle only
+                const handle = row.querySelector('.drag-handle');
+                handle.addEventListener('dragstart', (e) => handleDragStart(e, row, classIndex));
+                handle.addEventListener('dragend', (e) => handleDragEnd(e, classIndex));
+
                 table.appendChild(row);
             });
             assignmentList.appendChild(table);
+        }
+
+        function handleDragStart(event, row, classIndex) {
+            draggedRowIndex = parseInt(row.dataset.index, 10);
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', draggedRowIndex);
+            row.classList.add('dragging');
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            const targetRow = event.currentTarget;
+            if (targetRow && targetRow.nodeName === 'TR') {
+                targetRow.classList.add('drag-over');
+            }
+        }
+
+        function handleDrop(event, classIndex) {
+            event.preventDefault();
+            const cls = classes[classIndex];
+            const fromIndex = draggedRowIndex;
+            const toIndex = parseInt(event.currentTarget.dataset.index, 10);
+            event.currentTarget.classList.remove('drag-over');
+
+            if (fromIndex === toIndex) return;
+
+            const movedItem = cls.assignments.splice(fromIndex, 1)[0];
+            cls.assignments.splice(toIndex, 0, movedItem);
+
+            const rows = event.currentTarget.parentElement.querySelectorAll('tr[data-index]');
+            rows.forEach((row, i) => {
+                row.dataset.index = i;
+            });
+        }
+
+        async function handleDragEnd(event, classIndex) {
+            const rows = event.currentTarget.closest('table').querySelectorAll('tr');
+            rows.forEach((row) => row.classList.remove('dragging', 'drag-over'));
+
+            await saveData();
+            renderAssignments(classIndex);
+            calculateGrade(classIndex);
+            draggedRowIndex = null;
         }
 
         function editAssignment(classIndex, assignmentIndex) {
@@ -845,7 +901,7 @@ console.log("rolesDoc does not exist, isAdmin: false");
             const assignmentRow = rows[assignmentIndex + 1];
             const newRow = document.createElement('tr');
             const td = document.createElement('td');
-            td.colSpan = 6;
+            td.colSpan = 7;
             td.appendChild(assignmentDiv);
             newRow.appendChild(td);
             assignmentList.querySelector('table').replaceChild(newRow, assignmentRow);
@@ -909,7 +965,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             return droppedAssignments.some(a => a.index === assignmentIndex);
         }
 
-        // ===== Grade Calculation =====
         function calculateGrade(classIndex) {
             const cls = classes[classIndex];
             const categoryGrades = {};
@@ -989,7 +1044,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             return 'You have the highest grade possible!';
         }
 
-        // ===== Assignment Statistics =====
         function renderAssignmentStatistics(classIndex) {
             const cls = classes[classIndex];
             const assignmentStatistics = document.getElementById('assignment-statistics');
@@ -1013,7 +1067,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             });
         }
 
-        // ===== Final Grade Calculator =====
         function renderFinalGradeCalculator(classIndex, currentGrade) {
             const cls = classes[classIndex];
             const finalGradeCalculator = document.getElementById('final-grade-calculator');
@@ -1055,14 +1108,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             }
 
             const finalCategoryWeight = cls.categories[finalCategoryIndex].weight;
-            const completedWeight = cls.categories.reduce((sum, cat, idx) => {
-                if (idx !== finalCategoryIndex) {
-                    const hasGrades = cls.assignments.some(a => a.categoryIndex === idx && !a.exclude);
-                    return hasGrades ? sum + Number(cat.weight) : sum;
-                }
-                return sum;
-            }, 0);
-
             const accumulatedScore = cls.categories.reduce((sum, cat, idx) => {
                 if (idx !== finalCategoryIndex) {
                     const grades = cls.assignments
@@ -1081,12 +1126,12 @@ console.log("rolesDoc does not exist, isAdmin: false");
                 <p>Calculate what you need on your <strong>${cls.categories[finalCategoryIndex].name}</strong> to achieve your target grade.</p>
                 <label>Desired Final Grade (%)</label>
                 <input type="number" id="desired-final-grade" placeholder="e.g., 85" min="0" max="100">
-                <button class="button" onclick="calculateNeededFinalScore(${classIndex}, ${accumulatedScore}, ${completedWeight}, ${finalCategoryWeight})">Calculate</button>
+                <button class="button" onclick="calculateNeededFinalScore(${classIndex}, ${accumulatedScore}, ${finalCategoryWeight})">Calculate</button>
                 <div id="needed-score-output"></div>
             `;
         }
 
-        function calculateNeededFinalScore(classIndex, accumulatedScore, completedWeight, finalCategoryWeight) {
+        function calculateNeededFinalScore(classIndex, accumulatedScore, finalCategoryWeight) {
             const cls = classes[classIndex];
             const desiredGradeInput = document.getElementById('desired-final-grade').value;
             const desiredGrade = Number(desiredGradeInput);
@@ -1096,7 +1141,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             }
 
             const neededScore = ((desiredGrade - (accumulatedScore / 100)) / (finalCategoryWeight / 100)).toFixed(2);
-
             const neededLetterGrade = getLetterGrade(neededScore);
 
             const output = document.getElementById('needed-score-output');
@@ -1109,7 +1153,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             }
         }
 
-        // ===== Data Export and Import =====
         document.getElementById('export-data-btn').onclick = function() {
             const data = {
                 classes: classes,
@@ -1155,7 +1198,6 @@ console.log("rolesDoc does not exist, isAdmin: false");
             reader.readAsText(file);
         };
 
-        // ===== GPA Calculator =====
         document.getElementById('gpa-calculator-btn').onclick = function() {
             renderGPACalculator();
         };
@@ -1275,7 +1317,7 @@ console.log("rolesDoc does not exist, isAdmin: false");
                 return;
             }
             if (isNaN(credits) || credits <= 0) {
-                credits = 1; // Default to 1 credit
+                credits = 1;
             }
 
             semester.classes.push({
@@ -1358,7 +1400,7 @@ console.log("rolesDoc does not exist, isAdmin: false");
                 return;
             }
             if (isNaN(credits) || credits <= 0) {
-                credits = 1; // Default to 1 credit
+                credits = 1;
             }
 
             cls.name = name;
