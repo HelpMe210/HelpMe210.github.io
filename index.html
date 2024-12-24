@@ -3,116 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <title>Grade Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        /* 
+           Dark, boyish theme. Blues & dark backgrounds.
+           Mobile friendly enhancements.
+           Better spacing on sidebar and buttons.
+        */
 
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-            --light-text-color: #ecf0f1;
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --highlight-excluded: #dfe6e9; /* Slightly grayish */
-            --highlight-dropped: #f9e79f;   /* A distinct yellow */
+            --background-color: #1d1f21;
+            --sidebar-color: #252729;
+            --accent-color: #2f81f7;
+            --text-color: #ffffff;
+            --text-color-light: #cccccc;
+            --border-color: #2c2f33;
+            --error-color: #e74c3c;
+            --success-color: #27ae60;
+            --transition-speed: 0.3s;
+            --table-row-hover: #2c2f33;
         }
 
         body {
-            font-family: var(--font-family);
-            background-color: var(--background-color);
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color-light);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        header {
+            background: var(--sidebar-color);
             color: var(--text-color);
-        }
-
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        h1, h2, h3, h4, h5 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            font-size: 24px;
-            margin-top: 20px;
-        }
-
-        h3 {
+            padding: 10px 20px;
             font-size: 20px;
-            margin-top: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
         }
 
-        h4 {
-            font-size: 18px;
-            margin-top: 15px;
+        header .title {
+            flex: 1;
         }
 
+        #container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
         #sidebar {
-            width: 220px;
-            background-color: var(--secondary-color);
-            color: var(--light-text-color);
-            float: left;
-            height: 100vh;
+            width: 240px;
+            background: var(--sidebar-color);
+            color: var(--text-color);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             overflow-y: auto;
-            position: fixed;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             padding-bottom: 20px;
         }
 
         #sidebar h2 {
             text-align: center;
             padding: 20px 0;
-            background-color: var(--primary-color);
-            margin-bottom: 20px;
-            color: var(--light-text-color);
+            margin: 0;
+            font-size: 22px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px;
+        }
+
+        .sidebar-button-group.bottom-buttons {
+            margin-top: auto;
         }
 
         #class-list {
             list-style: none;
-            padding: 0 20px;
+            padding: 0;
+            margin: 0 0 20px 0;
         }
 
         #class-list li {
-            padding: 10px;
+            padding: 10px 20px;
             cursor: pointer;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-color);
+            transition: background var(--transition-speed);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #class-list li:hover, #class-list .active {
-            background-color: rgba(255, 255, 255, 0.1);
+            background: #2c2f33;
         }
 
+        /* CONTENT */
         #content {
-            margin-left: 240px;
+            flex: 1;
+            overflow-y: auto;
             padding: 20px;
-            max-width: 1000px;
-        }
-
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
         }
 
         .button {
-            padding: 10px 15px;
-            background-color: var(--primary-color);
-            color: var(--light-text-color);
+            padding: 8px 15px;
+            background: var(--accent-color);
+            color: var(--text-color);
             border: none;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 4px;
             font-size: 14px;
             text-align: center;
+            font-weight: 600;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed), background var(--transition-speed);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: inline-block;
         }
 
         .button:hover {
-            background-color: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .button.small {
@@ -121,172 +140,220 @@
         }
 
         .button.accent {
-            background-color: var(--accent-color);
-        }
-
-        .button.accent:hover {
-            background-color: #c0392b;
+            background: var(--error-color);
         }
 
         .button.secondary {
-            background-color: #95a5a6;
+            background: #3b3e42;
         }
 
-        .button.secondary:hover {
-            background-color: #7f8c8d;
-        }
-
-        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select {
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
             padding: 8px;
             width: 100%;
             margin: 5px 0 15px 0;
-            border: 1px solid #bdc3c7;
+            border: 1px solid #444;
             border-radius: 5px;
+            font-size: 14px;
+            color: var(--text-color);
+            background: #2c2f33;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent-color);
+            outline: none;
         }
 
         label {
             margin-bottom: 5px;
             display: block;
+            font-weight: 600;
+            color: var(--text-color-light);
         }
 
         section {
             margin-bottom: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border: 1px solid #ddd;
+            padding: 20px;
+            background: #2c2f33;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        h2, h3, h4 {
+            color: var(--text-color);
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        p, li {
+            color: var(--text-color-light);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            background: #1f2123;
+            border-radius: 10px;
+            overflow: hidden;
+            table-layout: auto; /* allow flexible cell sizes */
         }
 
         table, th, td {
-            border: 1px solid #bdc3c7;
+            border: none;
         }
 
         th, td {
             padding: 12px;
-            text-align: center;
+            text-align: left;
+            border-bottom: 1px solid #333;
+            vertical-align: top;
+            color: var(--text-color-light);
+            white-space: normal; /* allow multiline */
         }
 
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        tr:hover {
+            background-color: var(--table-row-hover);
         }
 
-        /* Improved highlighting for excluded and dropped assignments */
+        /* Animate assignment row movement more clearly */
+        tbody tr.move-animation {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Excluded or dropped assignment row backgrounds */
         .excluded-manual {
-            background-color: var(--highlight-excluded) !important;
+            background-color: rgba(231, 76, 60, 0.3) !important;
         }
 
         .excluded-dropped {
-            background-color: var(--highlight-dropped) !important;
+            background-color: rgba(241, 196, 15, 0.3) !important;
+        }
+
+        .error {
+            color: var(--error-color);
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-block;
         }
 
         footer {
             text-align: center;
-            margin-top: 20px;
-            color: #7f8c8d;
             padding: 10px 0;
-            background-color: #f8f9fa;
-            border-top: 1px solid #ddd;
+            background: #252729;
+            color: var(--text-color-light);
+            border-top: 1px solid var(--border-color);
         }
 
-        @media (max-width: 768px) {
-            #sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-
-            #content {
-                margin-left: 0;
-            }
-        }
-
-        #sidebar .bottom-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 0 20px;
-            margin-top: auto;
+        #login-container {
+            padding:20px;
+            max-width: 300px;
+            margin: 100px auto;
+            background: #2c2f33;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         #admin-controls {
             margin-top: 20px;
             display: none;
+            padding: 20px;
+            background: #2c2f33;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
         }
 
-        /* Drag-and-drop feedback */
-        .dragging {
-            opacity: 0.5;
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 200px;
+            }
+
+            .sidebar-button-group {
+                margin: 10px;
+            }
         }
 
-        /* Only show the drop line on the current hovered row */
-        .drag-over {
-            position: relative;
-        }
+        @media (max-width: 600px) {
+            #sidebar {
+                position: fixed;
+                width: 100%;
+                height: auto;
+                z-index: 100;
+                border-bottom: 1px solid var(--border-color);
+            }
 
-        .drag-over::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: var(--primary-color);
-            z-index: 9999;
-        }
+            #container {
+                flex-direction: column;
+            }
 
-        /* Drag handle */
-        .drag-handle {
-            cursor: grab;
-        }
+            #content {
+                margin-left: 0 !important;
+                padding-top: 80px; /* to avoid overlap with sidebar now on top */
+            }
 
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .handle-col {
-            width: 30px;
+            #sidebar h2 {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="login-container" style="display:none; padding:20px;">
+    <header>
+        <div class="title">Grade Tracker</div>
+        <div style="font-size:14px;">built by Reuven Sash</div>
+    </header>
+    <div id="login-container" style="display:none;">
         <h2>Login</h2>
         <label>Email</label>
         <input type="email" id="login-email" placeholder="Email" />
         <label>Password</label>
         <input type="password" id="login-password" placeholder="Password" />
-        <button id="login-button">Login</button>
-        <div id="login-error" style="color:red;"></div>
+        <button id="login-button" class="button">Login</button>
+        <div id="login-error" class="error"></div>
     </div>
+    <div id="container">
+        <div id="sidebar" style="display:none;">
+            <h2>Your Classes</h2>
+            <div class="sidebar-button-group">
+                <button id="add-class-btn" class="button">Add New Class</button>
+                <button id="gpa-calculator-btn" class="button secondary">GPA Calculator</button>
+            </div>
+            <ul id="class-list"></ul>
+            <div class="sidebar-button-group bottom-buttons">
+                <button id="export-data-btn" class="button small">Export JSON</button>
+                <button id="export-csv-btn" class="button small">Export CSV</button>
+                <button id="import-data-btn" class="button small">Import Data</button>
+                <input type="file" id="import-file-input" accept=".json,.csv" style="display:none;">
+                <button id="logout-button" class="button accent small">Logout</button>
+            </div>
+            <div id="admin-controls">
+                <h3>Admin Controls</h3>
+                <label for="user-select">Select User</label>
+                <select id="user-select"></select>
+                <button id="switch-user-button" class="button">Load Selected User</button>
+            </div>
+        </div>
 
-    <div id="sidebar" style="display:none;">
-        <h2>Grade Tracker</h2>
-        <div class="button-group">
-            <button id="add-class-btn" class="button">Add New Class</button>
-            <button id="gpa-calculator-btn" class="button">GPA Calculator</button>
-        </div>
-        <ul id="class-list"></ul>
-        <div class="button-group bottom-buttons">
-            <button id="export-data-btn" class="button secondary small">Export Data</button>
-            <button id="import-data-btn" class="button secondary small">Import Data</button>
-            <input type="file" id="import-file-input" accept=".json" style="display:none;">
-            <button id="logout-button" class="button accent small">Logout</button>
-        </div>
-
-        <div id="admin-controls">
-            <h3>Admin Controls</h3>
-            <label for="user-select">Select User</label>
-            <select id="user-select"></select>
-            <button id="switch-user-button" class="button">Load Selected User</button>
-        </div>
+        <div id="content" style="display:none;"></div>
     </div>
-
-    <div id="content" style="display:none;"></div>
-
     <footer>
         Built by Reuven Sash + ChatGPT
     </footer>
@@ -299,15 +366,13 @@
     <script>
         // ===== Firebase Initialization =====
         const firebaseConfig = {
-           apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
+            apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
   authDomain: "yof-tracker.firebaseapp.com",
   projectId: "yof-tracker",
   storageBucket: "yof-tracker.firebasestorage.app",
   messagingSenderId: "867007397664",
   appId: "1:867007397664:web:9cbccc410443d6581a2145"
         };
-
-        // Replace above with your actual Firebase config.
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -324,16 +389,16 @@
             if (user) {
                 currentUser = user;
                 try {
-                    const rolesDoc = await db.collection('adminInfo').doc('roles').get();
-                    if (rolesDoc.exists) {
-                        const data = rolesDoc.data();
-                        isAdmin = Array.isArray(data.adminUsers) && data.adminUsers.includes(user.uid);
-                    } else {
-                        isAdmin = false;
-                    }
-                } catch (err) {
-                    console.error("Error checking admin roles:", err);
+                  const rolesDoc = await db.collection('adminInfo').doc('roles').get();
+                  if (rolesDoc.exists) {
+                    const data = rolesDoc.data();
+                    isAdmin = Array.isArray(data.adminUsers) && data.adminUsers.includes(user.uid);
+                  } else {
                     isAdmin = false;
+                  }
+                } catch (err) {
+                  console.error("Error checking admin roles:", err);
+                  isAdmin = false;
                 }
 
                 if (isAdmin) {
@@ -374,10 +439,10 @@
             const userSelect = document.getElementById('user-select');
             userSelect.innerHTML = '<option value="">--Select a user--</option>';
             snapshot.forEach(doc => {
-                const opt = document.createElement('option');
-                opt.value = doc.id;
-                opt.textContent = doc.id;
-                userSelect.appendChild(opt);
+              const opt = document.createElement('option');
+              opt.value = doc.id;
+              opt.textContent = doc.id;
+              userSelect.appendChild(opt);
             });
         }
 
@@ -396,13 +461,13 @@
         };
 
         document.getElementById('switch-user-button').onclick = async function() {
-            const selectedUserId = document.getElementById('user-select').value;
-            if (!selectedUserId) {
-                alert('Please select a user');
-                return;
-            }
-            docRef = db.collection('gradeTracker').doc(selectedUserId);
-            await loadDataFromFirestore();
+          const selectedUserId = document.getElementById('user-select').value;
+          if (!selectedUserId) {
+            alert('Please select a user');
+            return;
+          }
+          docRef = db.collection('gradeTracker').doc(selectedUserId);
+          await loadDataFromFirestore();
         };
 
         async function loadDataFromFirestore() {
@@ -427,9 +492,13 @@
         }
 
         async function saveData() {
-            if (!dataLoaded || !docRef) return; 
+            if (!dataLoaded || !docRef) return;
             await docRef.set({ classes, semesters });
         }
+
+        /*============================
+          CLASS LIST & MAIN CONTENT
+        ============================*/
 
         function renderClassList() {
             const classList = document.getElementById('class-list');
@@ -449,29 +518,43 @@
         function renderClassContent(classIndex) {
             const content = document.getElementById('content');
             const cls = classes[classIndex];
+            if (!cls.categories) cls.categories = [];
+
+            // Check if categories total 100
+            let totalWeight = cls.categories.reduce((sum, cat) => sum + Number(cat.weight), 0);
+            let categoryWarning = '';
+            if (totalWeight !== 100) {
+                categoryWarning = `
+                    <p class="error">
+                        Warning: Categories total ${totalWeight}%. They should total 100% for accurate final grading.
+                    </p>
+                `;
+            }
 
             content.innerHTML = `
                 <h2>${cls.name}</h2>
-                <div class="button-group">
+                <div style="margin-bottom:20px;">
                     <button class="button" onclick="editClass(${classIndex})">Edit Class</button>
                     <button class="button accent small" onclick="deleteClass(${classIndex})">Delete</button>
                 </div>
-                <section id="categories">
+                <section>
                     <h3>Categories</h3>
+                    ${categoryWarning}
                     <div id="category-list"></div>
-                    <button class="button" onclick="addCategory(${classIndex})">Add Category</button>
+                    <div style="margin-top:10px;">
+                        <button class="button small" style="margin-top:10px;" onclick="addCategory(${classIndex})">Add Category</button>
+                    </div>
                     <span id="category-error" class="error"></span>
                 </section>
-                <section id="assignments">
+                <section>
                     <h3>Assignments</h3>
                     <div id="assignment-list"></div>
                     <button class="button" onclick="addAssignment(${classIndex})">Add Assignment</button>
                     <span id="assignment-error" class="error"></span>
                 </section>
                 <section id="grade-summary-section">
+                    <h3>Current Grade</h3>
                     <div id="grade-summary"></div>
-                    <div id="final-grade-calculator"></div>
-                    <div id="assignment-statistics"></div>
                 </section>
             `;
 
@@ -489,8 +572,8 @@
                     <input type="text" id="new-class-name" placeholder="e.g., Mathematics">
                     <label>Credits (default is 1)</label>
                     <input type="number" id="new-class-credits" placeholder="e.g., 1" min="0.1" step="0.1">
-                    <div class="button-group">
-                        <button class="button" onclick="saveNewClass(this)">Save</button>
+                    <div style="margin-top:20px;">
+                        <button class="button" onclick="saveNewClass()">Save</button>
                         <button class="button accent" onclick="renderClassContentOnCancel()">Cancel</button>
                     </div>
                 </section>
@@ -505,7 +588,7 @@
           }
         }
 
-        async function saveNewClass(button) {
+        async function saveNewClass() {
             const className = document.getElementById('new-class-name').value.trim();
             let classCredits = parseFloat(document.getElementById('new-class-credits').value);
             if (className === '') {
@@ -513,7 +596,7 @@
                 return;
             }
             if (isNaN(classCredits) || classCredits <= 0) {
-                classCredits = 1; 
+                classCredits = 1;
             }
             classes.push({
                 name: className,
@@ -539,7 +622,7 @@
                 <input type="text" id="edit-class-name" value="${cls.name}">
                 <label>Credits (default is 1)</label>
                 <input type="number" id="edit-class-credits" value="${cls.credits}" min="0.1" step="0.1">
-                <div class="button-group">
+                <div style="margin-top:20px;">
                     <button class="button" onclick="saveEditedClass(${classIndex})">Save</button>
                     <button class="button accent" onclick="renderClassContent(${classIndex})">Cancel</button>
                 </div>
@@ -555,7 +638,7 @@
                 return;
             }
             if (isNaN(newCredits) || newCredits <= 0) {
-                newCredits = 1; 
+                newCredits = 1;
             }
             cls.name = newName;
             cls.credits = newCredits;
@@ -573,9 +656,14 @@
             }
         }
 
+        /*============================
+          CATEGORIES
+        ============================*/
+
         function addCategory(classIndex) {
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'category';
+
             categoryDiv.innerHTML = `
                 <label>Category Name</label>
                 <input type="text" placeholder="e.g., Quizzes">
@@ -583,9 +671,9 @@
                 <input type="number" placeholder="e.g., 20" min="0" max="100">
                 <label>Number of Lowest Grades to Drop</label>
                 <input type="number" placeholder="e.g., 1" min="0" step="1">
-                <div class="button-group">
-                    <button class="button" onclick="saveCategory(${classIndex}, this)">Save</button>
-                    <button class="button accent" onclick="renderCategories(${classIndex})">Cancel</button>
+                <div style="margin-top:10px;">
+                    <button class="button small" onclick="saveCategory(${classIndex}, this)">Save</button>
+                    <button class="button accent small" onclick="renderCategories(${classIndex})">Cancel</button>
                 </div>
             `;
             document.getElementById('category-list').appendChild(categoryDiv);
@@ -610,7 +698,7 @@
 
             const totalWeight = cls.categories.reduce((sum, cat) => sum + Number(cat.weight), 0) + weight;
             if (totalWeight > 100) {
-                alert('Total weight exceeds 100%. Please adjust the weights.');
+                alert('Total weight exceeds 100%. Adjust the weights.');
                 return;
             }
 
@@ -628,13 +716,15 @@
             const cls = classes[classIndex];
             const categoryList = document.getElementById('category-list');
             categoryList.innerHTML = '';
+            if (!cls.categories) cls.categories = [];
             cls.categories.forEach((cat, index) => {
                 const div = document.createElement('div');
                 div.className = 'category';
+                div.style.marginBottom = '10px';
                 div.innerHTML = `
                     <strong>${cat.name}</strong> - Weight: ${cat.weight}% 
                     ${cat.numToDrop > 0 ? `<em>(Drop Lowest ${cat.numToDrop})</em>` : ''}
-                    <div class="button-group">
+                    <div style="margin-top:5px;">
                         <button class="button small" onclick="editCategory(${classIndex}, ${index})">Edit</button>
                         <button class="button accent small" onclick="deleteCategory(${classIndex}, ${index})">Delete</button>
                     </div>
@@ -654,12 +744,12 @@
                 <label>Category Name</label>
                 <input type="text" value="${cat.name}">
                 <label>Weight (%)</label>
-                <input type="number" placeholder="e.g., 20" min="0" max="100" value="${cat.weight}">
+                <input type="number" min="0" max="100" value="${cat.weight}">
                 <label>Number of Lowest Grades to Drop</label>
-                <input type="number" placeholder="e.g., 1" min="0" step="1" value="${cat.numToDrop || 0}">
-                <div class="button-group">
-                    <button class="button" onclick="saveEditedCategory(${classIndex}, ${categoryIndex}, this)">Save</button>
-                    <button class="button accent" onclick="renderCategories(${classIndex})">Cancel</button>
+                <input type="number" min="0" step="1" value="${cat.numToDrop || 0}">
+                <div style="margin-top:10px;">
+                    <button class="button small" onclick="saveEditedCategory(${classIndex}, ${categoryIndex}, this)">Save</button>
+                    <button class="button accent small" onclick="renderCategories(${classIndex})">Cancel</button>
                 </div>
             `;
 
@@ -687,7 +777,7 @@
 
             const totalWeight = cls.categories.reduce((sum, c, i) => sum + (i !== categoryIndex ? Number(c.weight) : 0), 0) + weight;
             if (totalWeight > 100) {
-                alert('Total weight exceeds 100%. Please adjust the weights.');
+                alert('Total weight exceeds 100%. Adjust the weights.');
                 return;
             }
 
@@ -703,10 +793,15 @@
             if (confirm('Deleting this category will also delete all associated assignments. Proceed?')) {
                 const cls = classes[classIndex];
                 cls.categories.splice(categoryIndex, 1);
+
+                // Remove assignments from this category
                 cls.assignments = cls.assignments.filter(a => a.categoryIndex !== categoryIndex);
+
+                // Re-index other assignments
                 cls.assignments.forEach(a => {
                     if (a.categoryIndex > categoryIndex) a.categoryIndex--;
                 });
+
                 if (cls.finalCategoryIndex === categoryIndex) {
                     cls.finalCategoryIndex = null;
                 } else if (cls.finalCategoryIndex > categoryIndex) {
@@ -719,6 +814,10 @@
             }
         }
 
+        /*============================
+          ASSIGNMENTS
+        ============================*/
+
         function addAssignment(classIndex) {
             const cls = classes[classIndex];
             if (cls.categories.length === 0) {
@@ -727,18 +826,21 @@
             }
             const categoryOptions = cls.categories.map((cat, index) => `<option value="${index}">${cat.name}</option>`).join('');
             const assignmentHTML = `
-                <div class="assignment">
+                <div class="assignment" style="margin-top:10px;">
                     <label>Assignment Name</label>
                     <input type="text" placeholder="e.g., Quiz 1">
                     <label>Category</label>
                     <select>
                         ${categoryOptions}
                     </select>
-                    <label>Score</label>
+                    <label>Score (or leave blank if incomplete) e.g. 18/25</label>
                     <input type="text" placeholder="e.g., 18/25">
-                    <div class="button-group">
-                        <button class="button" onclick="saveAssignment(${classIndex}, this)">Save</button>
-                        <button class="button accent" onclick="renderAssignments(${classIndex})">Cancel</button>
+                    <label style="margin-top:5px;">
+                        <input type="checkbox"> Exclude from Grade
+                    </label>
+                    <div style="margin-top:10px;">
+                        <button class="button small" onclick="saveAssignment(${classIndex}, this)">Save</button>
+                        <button class="button accent small" onclick="renderAssignments(${classIndex})">Cancel</button>
                     </div>
                 </div>
             `;
@@ -751,42 +853,52 @@
             const inputs = assignmentDiv.querySelectorAll('input');
             const selects = assignmentDiv.querySelectorAll('select');
             const name = inputs[0].value.trim();
-            const categoryIndex = selects[0].value;
-            const gradeInput = inputs[1].value;
-            const [score, total] = gradeInput.split('/').map(Number);
+            const categoryIndex = Number(selects[0].value);
+            const gradeInput = inputs[1].value.trim();
+            const exclude = inputs[2].checked;
 
-            if (name === '' || isNaN(score) || isNaN(total) || total === 0) {
-                alert('Please enter valid assignment details.');
+            let score = null;
+            let total = null;
+            if (gradeInput && gradeInput.includes('/')) {
+                const parts = gradeInput.split('/');
+                score = Number(parts[0]);
+                total = Number(parts[1]);
+                if (isNaN(score) || isNaN(total) || total === 0) {
+                    alert('Invalid score format.');
+                    return;
+                }
+            }
+
+            if (name === '') {
+                alert('Please enter a valid assignment name.');
                 return;
             }
 
             cls.assignments.push({
                 name: name,
-                categoryIndex: Number(categoryIndex),
+                categoryIndex: categoryIndex,
                 score: score,
                 total: total,
-                exclude: false
+                exclude: exclude
             });
             await saveData();
             renderAssignments(classIndex);
             calculateGrade(classIndex);
         }
 
-        let draggedRowIndex = null;
-
         function renderAssignments(classIndex) {
             const cls = classes[classIndex];
             const assignmentList = document.getElementById('assignment-list');
             assignmentList.innerHTML = '';
-            if (cls.assignments.length === 0) {
+            if (!cls.assignments || cls.assignments.length === 0) {
                 assignmentList.innerHTML = '<p>No assignments added yet.</p>';
                 return;
             }
 
             const table = document.createElement('table');
-            table.innerHTML = `
+            let thead = document.createElement('thead');
+            thead.innerHTML = `
                 <tr>
-                    <th class="handle-col"></th>
                     <th>Name</th>
                     <th>Category</th>
                     <th>Score</th>
@@ -795,92 +907,82 @@
                     <th>Actions</th>
                 </tr>
             `;
+            table.appendChild(thead);
+            const tbody = document.createElement('tbody');
+            table.appendChild(tbody);
+
             cls.assignments.forEach((assignment, index) => {
                 const catName = cls.categories[assignment.categoryIndex].name;
-                const percentage = ((assignment.score / assignment.total) * 100).toFixed(2) + '%';
-                const row = document.createElement('tr');
-                row.dataset.index = index;
-                row.addEventListener('dragover', handleDragOver);
-                row.addEventListener('drop', (e) => handleDrop(e, classIndex));
-
-                const isDropped = isAssignmentDropped(cls, assignment.categoryIndex, index);
-                let statusLabel = '';
-                if (assignment.exclude) {
-                    row.classList.add('excluded-manual');
-                    statusLabel = '<em>(Excluded)</em>';
-                } else if (isDropped) {
-                    row.classList.add('excluded-dropped');
-                    statusLabel = '<em>(Dropped)</em>';
+                let percentage = '';
+                if (assignment.score !== null && assignment.total !== null) {
+                    percentage = ((assignment.score / assignment.total) * 100).toFixed(2) + '%';
+                } else {
+                    percentage = '<em>Incomplete</em>';
                 }
 
-                row.innerHTML = `
-                    <td><span class="drag-handle" draggable="true">⋮⋮⋮</span></td>
-                    <td>${assignment.name} ${statusLabel}</td>
+                const tr = document.createElement('tr');
+
+                // Exclude / dropped highlight
+                if (assignment.exclude) {
+                    tr.classList.add('excluded-manual');
+                } else if (isAssignmentDropped(cls, assignment.categoryIndex, index)) {
+                    tr.classList.add('excluded-dropped');
+                }
+
+                tr.innerHTML = `
+                    <td>${assignment.name} ${assignment.exclude ? '<em>(Excluded)</em>' : ''}</td>
                     <td>${catName}</td>
-                    <td>${assignment.score}</td>
-                    <td>${assignment.total}</td>
+                    <td>${assignment.score === null ? '—' : assignment.score}</td>
+                    <td>${assignment.total === null ? '—' : assignment.total}</td>
                     <td>${percentage}</td>
                     <td>
                         <button class="button small" onclick="editAssignment(${classIndex}, ${index})">Edit</button>
                         <button class="button accent small" onclick="deleteAssignment(${classIndex}, ${index})">Delete</button>
+                        <button class="button small" onclick="moveAssignmentUp(${classIndex}, ${index})" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="button small" onclick="moveAssignmentDown(${classIndex}, ${index})" ${index === cls.assignments.length - 1 ? 'disabled' : ''}>↓</button>
                     </td>
                 `;
-
-                const handle = row.querySelector('.drag-handle');
-                handle.addEventListener('dragstart', (e) => handleDragStart(e, row, classIndex));
-                handle.addEventListener('dragend', (e) => handleDragEnd(e, classIndex));
-
-                table.appendChild(row);
+                tbody.appendChild(tr);
             });
             assignmentList.appendChild(table);
         }
 
-        function handleDragStart(event, row, classIndex) {
-            draggedRowIndex = parseInt(row.dataset.index, 10);
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', draggedRowIndex);
-            row.classList.add('dragging');
-        }
+        async function moveAssignmentUp(classIndex, assignmentIndex) {
+            const cls = classes[classIndex];
+            if (assignmentIndex > 0) {
+                // Grab table rows to animate
+                const tbody = document.querySelector('#assignment-list tbody');
+                const rows = tbody.querySelectorAll('tr');
+                rows[assignmentIndex].classList.add('move-animation');
+                rows[assignmentIndex - 1].classList.add('move-animation');
 
-        function handleDragOver(event) {
-            event.preventDefault();
-            const table = event.currentTarget.closest('table');
-            const rows = table.querySelectorAll('tr[data-index]');
-            rows.forEach(row => row.classList.remove('drag-over'));
+                // Reorder in array
+                const temp = cls.assignments[assignmentIndex];
+                cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
+                cls.assignments[assignmentIndex - 1] = temp;
 
-            const targetRow = event.currentTarget;
-            if (targetRow && targetRow.nodeName === 'TR') {
-                targetRow.classList.add('drag-over');
+                await saveData();
+                renderAssignments(classIndex);
             }
         }
 
-        function handleDrop(event, classIndex) {
-            event.preventDefault();
+        async function moveAssignmentDown(classIndex, assignmentIndex) {
             const cls = classes[classIndex];
-            const fromIndex = draggedRowIndex;
-            const toIndex = parseInt(event.currentTarget.dataset.index, 10);
-            event.currentTarget.classList.remove('drag-over');
+            if (assignmentIndex < cls.assignments.length - 1) {
+                // Grab table rows to animate
+                const tbody = document.querySelector('#assignment-list tbody');
+                const rows = tbody.querySelectorAll('tr');
+                rows[assignmentIndex].classList.add('move-animation');
+                rows[assignmentIndex + 1].classList.add('move-animation');
 
-            if (fromIndex === toIndex) return;
+                // Reorder in array
+                const temp = cls.assignments[assignmentIndex];
+                cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
+                cls.assignments[assignmentIndex + 1] = temp;
 
-            const movedItem = cls.assignments.splice(fromIndex, 1)[0];
-            cls.assignments.splice(toIndex, 0, movedItem);
-
-            const rows = event.currentTarget.parentElement.querySelectorAll('tr[data-index]');
-            rows.forEach((row, i) => {
-                row.dataset.index = i;
-            });
-        }
-
-        async function handleDragEnd(event, classIndex) {
-            const table = event.currentTarget.closest('table');
-            const rows = table.querySelectorAll('tr');
-            rows.forEach((row) => row.classList.remove('dragging', 'drag-over'));
-
-            await saveData();
-            renderAssignments(classIndex);
-            calculateGrade(classIndex);
-            draggedRowIndex = null;
+                await saveData();
+                renderAssignments(classIndex);
+            }
         }
 
         function editAssignment(classIndex, assignmentIndex) {
@@ -889,36 +991,39 @@
 
             const categoryOptions = cls.categories.map((cat, index) => `<option value="${index}" ${index === assignment.categoryIndex ? 'selected' : ''}>${cat.name}</option>`).join('');
 
-            const assignmentDiv = document.createElement('div');
-            assignmentDiv.className = 'assignment';
-
-            assignmentDiv.innerHTML = `
-                <label>Assignment Name</label>
-                <input type="text" value="${assignment.name}">
-                <label>Category</label>
-                <select>
-                    ${categoryOptions}
-                </select>
-                <label>Score</label>
-                <input type="text" value="${assignment.score}/${assignment.total}">
-                <label>
-                    <input type="checkbox" ${assignment.exclude ? 'checked' : ''}> Exclude from Grade
-                </label>
-                <div class="button-group">
-                    <button class="button" onclick="saveEditedAssignment(${classIndex}, ${assignmentIndex}, this)">Save</button>
-                    <button class="button accent" onclick="renderAssignments(${classIndex})">Cancel</button>
-                </div>
-            `;
-
             const assignmentList = document.getElementById('assignment-list');
-            const rows = assignmentList.querySelectorAll('tr');
-            const assignmentRow = rows[assignmentIndex + 1];
-            const newRow = document.createElement('tr');
-            const td = document.createElement('td');
-            td.colSpan = 7;
-            td.appendChild(assignmentDiv);
-            newRow.appendChild(td);
-            assignmentList.querySelector('table').replaceChild(newRow, assignmentRow);
+            const table = assignmentList.querySelector('table');
+            const rows = table.querySelectorAll('tbody tr');
+            const assignmentRow = rows[assignmentIndex];
+
+            const editRow = document.createElement('tr');
+            let scoreText = '';
+            if (assignment.score !== null && assignment.total !== null) {
+                scoreText = `${assignment.score}/${assignment.total}`;
+            }
+
+            editRow.innerHTML = `
+                <td colspan="6">
+                    <div class="assignment">
+                        <label>Assignment Name</label>
+                        <input type="text" value="${assignment.name}">
+                        <label>Category</label>
+                        <select>
+                            ${categoryOptions}
+                        </select>
+                        <label>Score (blank if incomplete)</label>
+                        <input type="text" value="${scoreText}">
+                        <label style="margin-top:5px;">
+                            <input type="checkbox" ${assignment.exclude ? 'checked' : ''}> Exclude from Grade
+                        </label>
+                        <div style="margin-top:10px;">
+                            <button class="button small" onclick="saveEditedAssignment(${classIndex}, ${assignmentIndex}, this)">Save</button>
+                            <button class="button accent small" onclick="renderAssignments(${classIndex})">Cancel</button>
+                        </div>
+                    </div>
+                </td>
+            `;
+            table.querySelector('tbody').replaceChild(editRow, assignmentRow);
         }
 
         async function saveEditedAssignment(classIndex, assignmentIndex, button) {
@@ -928,18 +1033,29 @@
             const inputs = assignmentDiv.querySelectorAll('input');
             const selects = assignmentDiv.querySelectorAll('select');
             const name = inputs[0].value.trim();
-            const categoryIndex = selects[0].value;
-            const gradeInput = inputs[1].value;
+            const categoryIndex = Number(selects[0].value);
+            const gradeInput = inputs[1].value.trim();
             const exclude = inputs[2].checked;
-            const [score, total] = gradeInput.split('/').map(Number);
 
-            if (name === '' || isNaN(score) || isNaN(total) || total === 0) {
-                alert('Please enter valid assignment details.');
+            let score = null;
+            let total = null;
+            if (gradeInput && gradeInput.includes('/')) {
+                const parts = gradeInput.split('/');
+                score = Number(parts[0]);
+                total = Number(parts[1]);
+                if (isNaN(score) || isNaN(total) || total === 0) {
+                    alert('Invalid score format.');
+                    return;
+                }
+            }
+
+            if (name === '') {
+                alert('Please enter a valid assignment name.');
                 return;
             }
 
             assignment.name = name;
-            assignment.categoryIndex = Number(categoryIndex);
+            assignment.categoryIndex = categoryIndex;
             assignment.score = score;
             assignment.total = total;
             assignment.exclude = exclude;
@@ -958,6 +1074,10 @@
             }
         }
 
+        /*============================
+          GRADE CALCULATION
+        ============================*/
+
         function isAssignmentDropped(cls, categoryIndex, assignmentIndex) {
             const cat = cls.categories[categoryIndex];
             const numToDrop = cat.numToDrop || 0;
@@ -965,7 +1085,7 @@
 
             const assignmentsInCategory = cls.assignments
                 .map((a, i) => ({...a, index: i}))
-                .filter(a => a.categoryIndex === categoryIndex && !a.exclude);
+                .filter(a => a.categoryIndex === categoryIndex && !a.exclude && a.score !== null && a.total !== null);
 
             if (assignmentsInCategory.length <= numToDrop) return false;
 
@@ -979,15 +1099,34 @@
             return droppedAssignments.some(a => a.index === assignmentIndex);
         }
 
+        // === The letter-grade scale with .5 cutoffs (the old scale) ===
+        // A+: >= 96.5
+        // A : >= 92.5
+        // A-: >= 89.5
+        // B+: >= 86.5
+        // B : >= 82.5
+        // B-: >= 79.5
+        // C+: >= 76.5
+        // C : >= 72.5
+        // C-: >= 69.5
+        // D : >= 64.5
+        // F : below 64.5
+
         function calculateGrade(classIndex) {
             const cls = classes[classIndex];
+
             const categoryGrades = {};
             cls.categories.forEach((cat, index) => {
                 categoryGrades[index] = [];
             });
 
             cls.assignments.forEach((assignment, index) => {
-                if (!assignment.exclude && !isAssignmentDropped(cls, assignment.categoryIndex, index)) {
+                if (
+                    !assignment.exclude && 
+                    !isAssignmentDropped(cls, assignment.categoryIndex, index) && 
+                    assignment.score !== null && 
+                    assignment.total !== null
+                ) {
                     categoryGrades[assignment.categoryIndex].push((assignment.score / assignment.total) * 100);
                 }
             });
@@ -997,14 +1136,14 @@
             let categoryAverages = {};
 
             cls.categories.forEach((cat, index) => {
-                let grades = categoryGrades[index];
-                if (grades.length > 0) {
+                const grades = categoryGrades[index];
+                if (grades && grades.length > 0) {
                     const average = grades.reduce((a, b) => a + b, 0) / grades.length;
                     totalWeightedScore += (average * cat.weight);
                     totalWeights += cat.weight;
                     categoryAverages[cat.name] = average.toFixed(2) + '%';
                 } else {
-                    categoryAverages[cat.name] = 'N/A';
+                    categoryAverages[cat.name] = 'No Assignments';
                 }
             });
 
@@ -1019,154 +1158,77 @@
             }
             categoryAverageHTML += '</ul>';
 
-            const nextGradeInfo = getNextLetterGradeInfo(finalGrade);
-
             gradeSummary.innerHTML = `
                 <p>Your current grade is: <strong>${finalGrade}% (${letterGrade}, GPA: ${gpaScale})</strong></p>
                 ${categoryAverageHTML}
-                <p>${nextGradeInfo}</p>
             `;
-
-            renderFinalGradeCalculator(classIndex, finalGrade);
-            renderAssignmentStatistics(classIndex);
         }
 
         function getLetterGrade(percentage) {
             percentage = Number(percentage);
-            if (percentage >= 97) return 'A+';
-            if (percentage >= 93) return 'A';
-            if (percentage >= 90) return 'A-';
-            if (percentage >= 87) return 'B+';
-            if (percentage >= 83) return 'B';
-            if (percentage >= 80) return 'B-';
-            if (percentage >= 77) return 'C+';
-            if (percentage >= 73) return 'C';
-            if (percentage >= 70) return 'C-';
-            if (percentage >= 65) return 'D';
+            if (percentage >= 96.5) return 'A+';
+            if (percentage >= 92.5) return 'A';
+            if (percentage >= 89.5) return 'A-';
+            if (percentage >= 86.5) return 'B+';
+            if (percentage >= 82.5) return 'B';
+            if (percentage >= 79.5) return 'B-';
+            if (percentage >= 76.5) return 'C+';
+            if (percentage >= 72.5) return 'C';
+            if (percentage >= 69.5) return 'C-';
+            if (percentage >= 64.5) return 'D';
             return 'F';
         }
 
-        function getNextLetterGradeInfo(currentGrade) {
-            const grades = [97, 93, 90, 87, 83, 80, 77, 73, 70, 65, 0];
-            const letters = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F'];
-            for (let i = 0; i < grades.length - 1; i++) {
-                if (currentGrade < grades[i] && currentGrade >= grades[i + 1]) {
-                    const needed = (grades[i] - currentGrade).toFixed(2);
-                    return `You need ${needed}% more to reach a ${letters[i]}.`;
-                }
-            }
-            return 'You have the highest grade possible!';
+        function getGPA(percentage) {
+            percentage = Number(percentage);
+            if (percentage >= 96.5) return 4.0;
+            if (percentage >= 92.5) return 3.7;
+            if (percentage >= 89.5) return 3.3;
+            if (percentage >= 86.5) return 3.0;
+            if (percentage >= 82.5) return 2.7;
+            if (percentage >= 79.5) return 2.3;
+            if (percentage >= 76.5) return 2.0;
+            if (percentage >= 72.5) return 1.7;
+            if (percentage >= 69.5) return 1.3;
+            if (percentage >= 64.5) return 1.0;
+            return 0.0;
         }
 
-        function renderAssignmentStatistics(classIndex) {
-            const cls = classes[classIndex];
-            const assignmentStatistics = document.getElementById('assignment-statistics');
-            assignmentStatistics.innerHTML = '<h3>Assignment Statistics</h3>';
-
-            cls.categories.forEach((cat, index) => {
-                const assignments = cls.assignments.filter(a => a.categoryIndex === index && !a.exclude && !isAssignmentDropped(cls, index, cls.assignments.indexOf(a)));
-                if (assignments.length > 0) {
-                    const percentages = assignments.map(a => (a.score / a.total) * 100);
-                    const highest = Math.max(...percentages).toFixed(2);
-                    const lowest = Math.min(...percentages).toFixed(2);
-                    const average = (percentages.reduce((a, b) => a + b, 0) / percentages.length).toFixed(2);
-
-                    assignmentStatistics.innerHTML += `
-                        <h4>${cat.name}</h4>
-                        <p>Highest Score: ${highest}%</p>
-                        <p>Lowest Score: ${lowest}%</p>
-                        <p>Average Score: ${average}%</p>
-                    `;
-                }
-            });
+        function getPercentageFromGPA(gpa) {
+            // Approximate midpoints for display (matching the old scale)
+            // Note: These are just used in the GPA Calculator summary 
+            // to show an approximate "percentage" from a GPA value.
+            if (gpa === 4.0) return 98;    // A+
+            if (gpa === 3.7) return 94;    // A
+            if (gpa === 3.3) return 90;    // A-
+            if (gpa === 3.0) return 87;    // B+
+            if (gpa === 2.7) return 84;    // B
+            if (gpa === 2.3) return 80;    // B-
+            if (gpa === 2.0) return 77;    // C+
+            if (gpa === 1.7) return 74;    // C
+            if (gpa === 1.3) return 70;    // C-
+            if (gpa === 1.0) return 65;    // D
+            return 60;                     // F
         }
 
-        function renderFinalGradeCalculator(classIndex, currentGrade) {
-            const cls = classes[classIndex];
-            const finalGradeCalculator = document.getElementById('final-grade-calculator');
-
-            const categoryOptions = cls.categories.map((cat, index) => `<option value="${index}" ${cls.finalCategoryIndex === index ? 'selected' : ''}>${cat.name}</option>`).join('');
-
-            finalGradeCalculator.innerHTML = `
-                <h3>Final Grade Calculator</h3>
-                <label>Select Final Category</label>
-                <select id="final-category-select" onchange="setFinalCategory(${classIndex}, this.value)">
-                    <option value="">--Select--</option>
-                    ${categoryOptions}
-                </select>
-                <div id="final-grade-calculator-content"></div>
-            `;
-
-            if (cls.finalCategoryIndex !== null) {
-                renderFinalGradeCalculatorContent(classIndex, currentGrade);
-            }
+        function getLetterGradeFromGPA(gpa) {
+            gpa = Number(gpa);
+            if (gpa === 4.0) return 'A+';
+            if (gpa === 3.7) return 'A';
+            if (gpa === 3.3) return 'A-';
+            if (gpa === 3.0) return 'B+';
+            if (gpa === 2.7) return 'B';
+            if (gpa === 2.3) return 'B-';
+            if (gpa === 2.0) return 'C+';
+            if (gpa === 1.7) return 'C';
+            if (gpa === 1.3) return 'C-';
+            if (gpa === 1.0) return 'D';
+            return 'F';
         }
 
-        function setFinalCategory(classIndex, categoryIndex) {
-            const cls = classes[classIndex];
-            if (categoryIndex === "") {
-                cls.finalCategoryIndex = null;
-            } else {
-                cls.finalCategoryIndex = Number(categoryIndex);
-            }
-            saveData();
-            renderFinalGradeCalculatorContent(classIndex, null);
-        }
-
-        function renderFinalGradeCalculatorContent(classIndex, currentGrade) {
-            const cls = classes[classIndex];
-            const finalCategoryIndex = cls.finalCategoryIndex;
-            if (finalCategoryIndex === null) {
-                document.getElementById('final-grade-calculator-content').innerHTML = '';
-                return;
-            }
-
-            const finalCategoryWeight = cls.categories[finalCategoryIndex].weight;
-            const accumulatedScore = cls.categories.reduce((sum, cat, idx) => {
-                if (idx !== finalCategoryIndex) {
-                    const grades = cls.assignments
-                        .filter(a => a.categoryIndex === idx && !a.exclude && !isAssignmentDropped(cls, idx, cls.assignments.indexOf(a)))
-                        .map(a => (a.score / a.total) * 100);
-
-                    if (grades.length > 0) {
-                        const average = grades.reduce((a, b) => a + b, 0) / grades.length;
-                        return sum + (average * cat.weight);
-                    }
-                }
-                return sum;
-            }, 0);
-
-            document.getElementById('final-grade-calculator-content').innerHTML = `
-                <p>Calculate what you need on your <strong>${cls.categories[finalCategoryIndex].name}</strong> to achieve your target grade.</p>
-                <label>Desired Final Grade (%)</label>
-                <input type="number" id="desired-final-grade" placeholder="e.g., 85" min="0" max="100">
-                <button class="button" onclick="calculateNeededFinalScore(${classIndex}, ${accumulatedScore}, ${finalCategoryWeight})">Calculate</button>
-                <div id="needed-score-output"></div>
-            `;
-        }
-
-        function calculateNeededFinalScore(classIndex, accumulatedScore, finalCategoryWeight) {
-            const cls = classes[classIndex];
-            const desiredGradeInput = document.getElementById('desired-final-grade').value;
-            const desiredGrade = Number(desiredGradeInput);
-            if (isNaN(desiredGrade) || desiredGrade < 0 || desiredGrade > 100) {
-                alert('Please enter a valid desired final grade between 0 and 100.');
-                return;
-            }
-
-            const neededScore = ((desiredGrade - (accumulatedScore / 100)) / (finalCategoryWeight / 100)).toFixed(2);
-            const neededLetterGrade = getLetterGrade(neededScore);
-
-            const output = document.getElementById('needed-score-output');
-            if (neededScore > 100) {
-                output.innerHTML = `<p>You need ${neededScore}% on your ${cls.categories[cls.finalCategoryIndex].name} to achieve a final grade of ${desiredGrade}%. This is not possible.</p>`;
-            } else if (neededScore < 0) {
-                output.innerHTML = `<p>You have already secured a final grade of ${desiredGrade}% or higher!</p>`;
-            } else {
-                output.innerHTML = `<p>You need to score ${neededScore}% (${neededLetterGrade}) on your ${cls.categories[cls.finalCategoryIndex].name} to achieve a final grade of ${desiredGrade}%.</p>`;
-            }
-        }
-
+        /*============================
+          EXPORT / IMPORT
+        ============================*/
         document.getElementById('export-data-btn').onclick = function() {
             const data = {
                 classes: classes,
@@ -1183,6 +1245,24 @@
             linkElement.click();
         };
 
+        document.getElementById('export-csv-btn').onclick = function() {
+            // Simple CSV export of classes and assignments
+            let csv = "Class,Category,Assignment,Score,Total,Excluded\n";
+            classes.forEach(cls => {
+                cls.assignments.forEach(a => {
+                    const catName = cls.categories[a.categoryIndex] ? cls.categories[a.categoryIndex].name : '';
+                    csv += `"${cls.name}","${catName}","${a.name}",${a.score !== null ? a.score : ''},${a.total !== null ? a.total : ''},${a.exclude}\n`;
+                });
+            });
+
+            const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'grade_tracker_data.csv');
+            link.click();
+        };
+
         document.getElementById('import-data-btn').onclick = function() {
             document.getElementById('import-file-input').click();
         };
@@ -1194,7 +1274,60 @@
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
+                    const text = e.target.result;
+                    let importedData;
+                    if (file.name.endsWith('.json')) {
+                        importedData = JSON.parse(text);
+                    } else if (file.name.endsWith('.csv')) {
+                        // CSV import: Just as a naive example
+                        const lines = text.split('\n').filter(l=>l.trim()!=='');
+                        // first line is header
+                        const classMap = {};
+
+                        lines.slice(1).forEach(line=>{
+                            const [clsName, catName, aName, score, total, exclude] = line.split(',');
+                            const cName = clsName.replace(/"/g,'');
+                            if(!classMap[cName]) {
+                                classMap[cName] = {
+                                    name: cName,
+                                    credits: 1,
+                                    categories: [],
+                                    assignments: [],
+                                    finalCategoryIndex: null
+                                };
+                            }
+                            let catIndex = -1;
+                            const realCatName = catName.replace(/"/g,'');
+                            if (realCatName) {
+                                catIndex = classMap[cName].categories.findIndex(c => c.name === realCatName);
+                                if (catIndex === -1) {
+                                    classMap[cName].categories.push({name: realCatName, weight:0, numToDrop:0});
+                                    catIndex = classMap[cName].categories.length - 1;
+                                }
+                            } else {
+                                // If no category given
+                                catIndex = 0;
+                                if (classMap[cName].categories.length === 0) {
+                                    classMap[cName].categories.push({name: "Uncategorized", weight:0, numToDrop:0});
+                                }
+                            }
+                            classMap[cName].assignments.push({
+                                name: aName.replace(/"/g,''),
+                                categoryIndex: catIndex,
+                                score: score===''?null:Number(score),
+                                total: total===''?null:Number(total),
+                                exclude: exclude==='true'
+                            });
+                        });
+
+                        importedData = {
+                            classes: Object.values(classMap),
+                            semesters: []
+                        };
+                    } else {
+                        throw new Error('Unsupported file format.');
+                    }
+
                     if (importedData.classes && importedData.semesters) {
                         classes = importedData.classes;
                         semesters = importedData.semesters;
@@ -1212,6 +1345,9 @@
             reader.readAsText(file);
         };
 
+        /*============================
+          GPA CALCULATOR
+        ============================*/
         document.getElementById('gpa-calculator-btn').onclick = function() {
             renderGPACalculator();
         };
@@ -1240,9 +1376,9 @@
             semesterDiv.innerHTML = `
                 <label>Semester Name</label>
                 <input type="text" placeholder="e.g., Fall 2023">
-                <div class="button-group">
-                    <button class="button" onclick="saveSemester(this)">Save</button>
-                    <button class="button accent" onclick="this.parentElement.parentElement.remove()">Cancel</button>
+                <div style="margin-top:10px;">
+                    <button class="button small" onclick="saveSemester(this)">Save</button>
+                    <button class="button accent small" onclick="this.parentElement.parentElement.remove()">Cancel</button>
                 </div>
             `;
             document.getElementById('semester-list').appendChild(semesterDiv);
@@ -1272,10 +1408,11 @@
             semesters.forEach((semester, sIndex) => {
                 const semesterDiv = document.createElement('div');
                 semesterDiv.className = 'semester';
+                semesterDiv.style.marginBottom = '20px';
                 semesterDiv.innerHTML = `
                     <h3>${semester.name}</h3>
                     <div id="class-list-${sIndex}"></div>
-                    <div class="button-group">
+                    <div style="margin-top:10px;">
                         <button class="button small" onclick="addClassToSemester(${sIndex})">Add Class</button>
                         <button class="button accent small" onclick="deleteSemester(${sIndex})">Delete Semester</button>
                     </div>
@@ -1296,19 +1433,19 @@
                 <input type="number" placeholder="e.g., 1" min="0.1" step="0.1">
                 <label>Letter Grade</label>
                 <select>
-                    <option value="4.0">A+ (97-100)</option>
-                    <option value="3.7">A (93-96)</option>
-                    <option value="3.3">A- (90-92)</option>
-                    <option value="3.0">B+ (87-89)</option>
-                    <option value="2.7">B (83-86)</option>
-                    <option value="2.3">B- (80-82)</option>
-                    <option value="2.0">C+ (77-79)</option>
-                    <option value="1.7">C (73-76)</option>
-                    <option value="1.3">C- (70-72)</option>
-                    <option value="1.0">D (65-69)</option>
-                    <option value="0.0">F (Below 65)</option>
+                    <option value="4.0">A+</option>
+                    <option value="3.7">A</option>
+                    <option value="3.3">A-</option>
+                    <option value="3.0">B+</option>
+                    <option value="2.7">B</option>
+                    <option value="2.3">B-</option>
+                    <option value="2.0">C+</option>
+                    <option value="1.7">C</option>
+                    <option value="1.3">C-</option>
+                    <option value="1.0">D</option>
+                    <option value="0.0">F</option>
                 </select>
-                <div class="button-group">
+                <div style="margin-top:10px;">
                     <button class="button small" onclick="saveClassInSemester(${sIndex}, this)">Save</button>
                     <button class="button accent small" onclick="this.parentElement.parentElement.remove()">Cancel</button>
                 </div>
@@ -1352,9 +1489,10 @@
             semester.classes.forEach((cls, cIndex) => {
                 const div = document.createElement('div');
                 div.className = 'class';
+                div.style.marginBottom = '10px';
                 div.innerHTML = `
                     <strong>${cls.name}</strong> - ${cls.letterGrade} (GPA: ${cls.gpa}, Credits: ${cls.credits})
-                    <div class="button-group">
+                    <div style="margin-top:5px;">
                         <button class="button small" onclick="editClassInSemester(${sIndex}, ${cIndex})">Edit</button>
                         <button class="button accent small" onclick="deleteClassInSemester(${sIndex}, ${cIndex})">Delete</button>
                     </div>
@@ -1376,19 +1514,19 @@
                 <input type="number" value="${cls.credits}" min="0.1" step="0.1">
                 <label>Letter Grade</label>
                 <select>
-                    <option value="4.0" ${cls.gpa === '4.00' ? 'selected' : ''}>A+ (97-100)</option>
-                    <option value="3.7" ${cls.gpa === '3.70' ? 'selected' : ''}>A (93-96)</option>
-                    <option value="3.3" ${cls.gpa === '3.30' ? 'selected' : ''}>A- (90-92)</option>
-                    <option value="3.0" ${cls.gpa === '3.00' ? 'selected' : ''}>B+ (87-89)</option>
-                    <option value="2.7" ${cls.gpa === '2.70' ? 'selected' : ''}>B (83-86)</option>
-                    <option value="2.3" ${cls.gpa === '2.30' ? 'selected' : ''}>B- (80-82)</option>
-                    <option value="2.0" ${cls.gpa === '2.00' ? 'selected' : ''}>C+ (77-79)</option>
-                    <option value="1.7" ${cls.gpa === '1.70' ? 'selected' : ''}>C (73-76)</option>
-                    <option value="1.3" ${cls.gpa === '1.30' ? 'selected' : ''}>C- (70-72)</option>
-                    <option value="1.0" ${cls.gpa === '1.00' ? 'selected' : ''}>D (65-69)</option>
-                    <option value="0.0" ${cls.gpa === '0.00' ? 'selected' : ''}>F (Below 65)</option>
+                    <option value="4.0"  ${cls.gpa === '4.00' ? 'selected' : ''}>A+</option>
+                    <option value="3.7"  ${cls.gpa === '3.70' ? 'selected' : ''}>A</option>
+                    <option value="3.3"  ${cls.gpa === '3.30' ? 'selected' : ''}>A-</option>
+                    <option value="3.0"  ${cls.gpa === '3.00' ? 'selected' : ''}>B+</option>
+                    <option value="2.7"  ${cls.gpa === '2.70' ? 'selected' : ''}>B</option>
+                    <option value="2.3"  ${cls.gpa === '2.30' ? 'selected' : ''}>B-</option>
+                    <option value="2.0"  ${cls.gpa === '2.00' ? 'selected' : ''}>C+</option>
+                    <option value="1.7"  ${cls.gpa === '1.70' ? 'selected' : ''}>C</option>
+                    <option value="1.3"  ${cls.gpa === '1.30' ? 'selected' : ''}>C-</option>
+                    <option value="1.0"  ${cls.gpa === '1.00' ? 'selected' : ''}>D</option>
+                    <option value="0.0"  ${cls.gpa === '0.00' ? 'selected' : ''}>F</option>
                 </select>
-                <div class="button-group">
+                <div style="margin-top:10px;">
                     <button class="button small" onclick="saveEditedClassInSemester(${sIndex}, ${cIndex}, this)">Save</button>
                     <button class="button accent small" onclick="renderClassesInSemester(${sIndex})">Cancel</button>
                 </div>
@@ -1454,14 +1592,16 @@
 
             const includeCurrentSemester = document.getElementById('include-current-semester') ? document.getElementById('include-current-semester').checked : true;
 
+            // Past Semesters
             semesters.forEach(semester => {
                 let semesterQualityPoints = 0;
                 let semesterCredits = 0;
                 let semesterPercentagePoints = 0;
                 semester.classes.forEach(cls => {
-                    semesterQualityPoints += Number(cls.gpa) * cls.credits;
+                    const numericGPA = Number(cls.gpa);
+                    semesterQualityPoints += numericGPA * cls.credits;
                     semesterCredits += cls.credits;
-                    const percentage = getPercentageFromGPA(Number(cls.gpa));
+                    const percentage = getPercentageFromGPA(numericGPA);
                     semesterPercentagePoints += percentage * cls.credits;
                 });
 
@@ -1474,13 +1614,10 @@
 
                 cumulativeGPADiv.innerHTML += `
                     <h4>${semester.name} GPA: ${averageSemesterGPA}, Percentage: ${averageSemesterPercentage}%</h4>
-                    <ul>
-                        ${semester.classes.map(cls => `<li>${cls.name}: ${cls.letterGrade} (${cls.gpa}, Credits: ${cls.credits})</li>`).join('')}
-                    </ul>
-                    <hr>
                 `;
             });
 
+            // Current Semester
             if (includeCurrentSemester) {
                 let currentSemesterQualityPoints = 0;
                 let currentSemesterCredits = 0;
@@ -1492,7 +1629,13 @@
 
                     cls.categories.forEach((cat, index) => {
                         const grades = cls.assignments
-                            .filter(a => a.categoryIndex === index && !a.exclude && !isAssignmentDropped(cls, index, cls.assignments.indexOf(a)))
+                            .filter(a => 
+                                a.categoryIndex === index && 
+                                !a.exclude && 
+                                !isAssignmentDropped(cls, index, cls.assignments.indexOf(a)) && 
+                                a.score !== null && 
+                                a.total !== null
+                            )
                             .map(a => (a.score / a.total) * 100);
 
                         if (grades.length > 0) {
@@ -1502,16 +1645,11 @@
                         }
                     });
 
-                    const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights).toFixed(2) : 0;
+                    const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights) : 0;
                     const gpa = getGPA(finalGrade);
-                    const letterGrade = getLetterGrade(finalGrade);
                     currentSemesterQualityPoints += gpa * cls.credits;
                     currentSemesterCredits += cls.credits;
                     currentSemesterPercentagePoints += finalGrade * cls.credits;
-
-                    cumulativeGPADiv.innerHTML += `
-                        <p><strong>${cls.name}</strong>: ${letterGrade} (${finalGrade}%, GPA: ${gpa.toFixed(2)}, Credits: ${cls.credits})</p>
-                    `;
                 });
 
                 if (currentSemesterCredits > 0) {
@@ -1519,7 +1657,6 @@
                     const averageCurrentPercentage = (currentSemesterPercentagePoints / currentSemesterCredits).toFixed(2);
                     cumulativeGPADiv.innerHTML += `
                         <h4>Current Semester GPA: ${averageCurrentGPA}, Percentage: ${averageCurrentPercentage}%</h4>
-                        <hr>
                     `;
                     totalQualityPoints += currentSemesterQualityPoints;
                     totalCredits += currentSemesterCredits;
@@ -1527,55 +1664,12 @@
                 }
             }
 
+            // Final Cumulative
             const cumulativeGPA = totalCredits > 0 ? (totalQualityPoints / totalCredits).toFixed(2) : 'N/A';
             const cumulativePercentage = totalCredits > 0 ? (totalPercentagePoints / totalCredits).toFixed(2) : 'N/A';
             cumulativeGPADiv.innerHTML += `
                 <h3>Cumulative GPA: ${cumulativeGPA}, Percentage: ${cumulativePercentage}%</h3>
             `;
-        }
-
-        function getGPA(percentage) {
-            percentage = Number(percentage);
-            if (percentage >= 97) return 4.0;
-            if (percentage >= 93) return 3.7;
-            if (percentage >= 90) return 3.3;
-            if (percentage >= 87) return 3.0;
-            if (percentage >= 83) return 2.7;
-            if (percentage >= 80) return 2.3;
-            if (percentage >= 77) return 2.0;
-            if (percentage >= 73) return 1.7;
-            if (percentage >= 70) return 1.3;
-            if (percentage >= 65) return 1.0;
-            return 0.0;
-        }
-
-        function getPercentageFromGPA(gpa) {
-            if (gpa === 4.0) return 97;
-            if (gpa === 3.7) return 93;
-            if (gpa === 3.3) return 90;
-            if (gpa === 3.0) return 87;
-            if (gpa === 2.7) return 83;
-            if (gpa === 2.3) return 80;
-            if (gpa === 2.0) return 77;
-            if (gpa === 1.7) return 73;
-            if (gpa === 1.3) return 70;
-            if (gpa === 1.0) return 65;
-            return 60;
-        }
-
-        function getLetterGradeFromGPA(gpa) {
-            gpa = Number(gpa);
-            if (gpa === 4.0) return 'A+';
-            if (gpa === 3.7) return 'A';
-            if (gpa === 3.3) return 'A-';
-            if (gpa === 3.0) return 'B+';
-            if (gpa === 2.7) return 'B';
-            if (gpa === 2.3) return 'B-';
-            if (gpa === 2.0) return 'C+';
-            if (gpa === 1.7) return 'C';
-            if (gpa === 1.3) return 'C-';
-            if (gpa === 1.0) return 'D';
-            return 'F';
         }
 
         document.getElementById('add-class-btn').onclick = addClass;
