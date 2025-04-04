@@ -6,42 +6,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* 
-           Dark, boyish theme. Blues & dark backgrounds.
-           Mobile friendly enhancements.
-           Better spacing on sidebar and buttons.
+           Modern, responsive dark theme with improved UI
+           Mobile-friendly with collapsible sidebar
+           Better visual hierarchy and spacing
         */
 
         :root {
-            --background-color: #1d1f21;
-            --sidebar-color: #252729;
-            --accent-color: #2f81f7;
+            --background-color: #121212;
+            --sidebar-color: #1e1e1e;
+            --accent-color: #4285f4;
+            --accent-hover: #5c9aff;
             --text-color: #ffffff;
-            --text-color-light: #cccccc;
-            --border-color: #2c2f33;
-            --error-color: #e74c3c;
-            --success-color: #27ae60;
-            --transition-speed: 0.3s;
+            --text-color-light: #e0e0e0;
+            --text-muted: #888888;
+            --border-color: #2a2a2a;
+            --error-color: #f44336;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --transition-speed: 0.2s;
             --table-row-hover: #2c2f33;
+            --A-color: #4caf50;
+            --B-color: #8bc34a;
+            --C-color: #ffeb3b;
+            --D-color: #ff9800;
+            --F-color: #f44336;
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
             background: var(--background-color);
             color: var(--text-color-light);
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: 100vh;
+            line-height: 1.6;
         }
 
         header {
             background: var(--sidebar-color);
             color: var(--text-color);
-            padding: 10px 20px;
-            font-size: 20px;
-            font-weight: bold;
+            padding: 15px 20px;
+            font-size: 22px;
+            font-weight: 700;
             display: flex;
             align-items: center;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         header .title {
@@ -52,11 +65,12 @@
             display: flex;
             flex: 1;
             overflow: hidden;
+            height: calc(100vh - 120px); /* header + footer height */
         }
 
         /* SIDEBAR */
         #sidebar {
-            width: 240px;
+            width: 260px;
             background: var(--sidebar-color);
             color: var(--text-color);
             flex-shrink: 0;
@@ -64,8 +78,9 @@
             flex-direction: column;
             height: 100%;
             overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
             padding-bottom: 20px;
+            transition: all var(--transition-speed);
         }
 
         #sidebar h2 {
@@ -79,7 +94,7 @@
         .sidebar-button-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             margin: 20px;
         }
 
@@ -94,7 +109,7 @@
         }
 
         #class-list li {
-            padding: 10px 20px;
+            padding: 12px 20px;
             cursor: pointer;
             border-bottom: 1px solid var(--border-color);
             transition: background var(--transition-speed);
@@ -103,39 +118,50 @@
             text-overflow: ellipsis;
         }
 
-        #class-list li:hover, #class-list .active {
-            background: #2c2f33;
+        #class-list li:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        #class-list .active {
+            background: rgba(66, 133, 244, 0.15);
+            border-left: 3px solid var(--accent-color);
         }
 
         /* CONTENT */
         #content {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 25px;
         }
 
         .button {
-            padding: 8px 15px;
+            padding: 10px 16px;
             background: var(--accent-color);
             color: var(--text-color);
             border: none;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
             text-align: center;
             font-weight: 600;
-            transition: transform var(--transition-speed), box-shadow var(--transition-speed), background var(--transition-speed);
+            transition: all var(--transition-speed);
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             display: inline-block;
         }
 
         .button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         .button.small {
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 12px;
         }
 
@@ -143,74 +169,87 @@
             background: var(--error-color);
         }
 
+        .button.accent:hover {
+            background: #f55a4e;
+        }
+
         .button.secondary {
             background: #3b3e42;
         }
 
+        .button.secondary:hover {
+            background: #4a4e54;
+        }
+
         input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
-            padding: 8px;
+            padding: 10px 12px;
             width: 100%;
-            margin: 5px 0 15px 0;
+            margin: 6px 0 16px 0;
             border: 1px solid #444;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 14px;
             color: var(--text-color);
             background: #2c2f33;
+            transition: border var(--transition-speed);
         }
 
         input:focus, select:focus, textarea:focus {
             border-color: var(--accent-color);
             outline: none;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.25);
         }
 
         label {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             display: block;
             font-weight: 600;
-            color: var(--text-color-light);
+            color: var(--text-color);
         }
 
         section {
             margin-bottom: 30px;
-            padding: 20px;
-            background: #2c2f33;
-            border-radius: 10px;
+            padding: 25px;
+            background: #1e1e1e;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         h2, h3, h4 {
             color: var(--text-color);
             margin-top: 0;
+            line-height: 1.3;
         }
 
         h2 {
-            font-size: 24px;
-            margin-bottom: 15px;
+            font-size: 26px;
+            margin-bottom: 20px;
         }
 
         h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
+            font-size: 22px;
+            margin-bottom: 15px;
         }
 
         h4 {
             font-size: 18px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         p, li {
             color: var(--text-color-light);
+            margin-bottom: 10px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            background: #1f2123;
+            background: #1a1a1a;
             border-radius: 10px;
             overflow: hidden;
-            table-layout: auto; /* allow flexible cell sizes */
+            table-layout: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         table, th, td {
@@ -218,16 +257,26 @@
         }
 
         th, td {
-            padding: 12px;
+            padding: 14px;
             text-align: left;
             border-bottom: 1px solid #333;
             vertical-align: top;
             color: var(--text-color-light);
-            white-space: normal; /* allow multiline */
+            white-space: normal;
+        }
+
+        th {
+            background: #252525;
+            font-weight: 600;
+            color: var(--text-color);
         }
 
         tr:hover {
             background-color: var(--table-row-hover);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
         }
 
         /* Animate assignment row movement more clearly */
@@ -237,11 +286,11 @@
 
         /* Excluded or dropped assignment row backgrounds */
         .excluded-manual {
-            background-color: rgba(231, 76, 60, 0.3) !important;
+            background-color: rgba(244, 67, 54, 0.15) !important;
         }
 
         .excluded-dropped {
-            background-color: rgba(241, 196, 15, 0.3) !important;
+            background-color: rgba(255, 152, 0, 0.15) !important;
         }
 
         .error {
@@ -253,64 +302,148 @@
 
         footer {
             text-align: center;
-            padding: 10px 0;
-            background: #252729;
-            color: var(--text-color-light);
+            padding: 15px 0;
+            background: #1e1e1e;
+            color: var(--text-muted);
             border-top: 1px solid var(--border-color);
         }
 
         #login-container {
-            padding:20px;
-            max-width: 300px;
+            padding: 30px;
+            max-width: 350px;
             margin: 100px auto;
-            background: #2c2f33;
+            background: #1e1e1e;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
 
         #admin-controls {
             margin-top: 20px;
             display: none;
             padding: 20px;
-            background: #2c2f33;
+            background: #1e1e1e;
             border-radius: 10px;
             text-align: center;
             border: 1px solid var(--border-color);
         }
 
+        /* Grade coloring */
+        .grade-a-plus {
+            color: var(--A-color) !important;
+            font-weight: bold;
+        }
+
+        .grade-a {
+            color: var(--A-color) !important;
+        }
+
+        .grade-a-minus {
+            color: var(--A-color) !important;
+        }
+
+        .grade-b-plus {
+            color: var(--B-color) !important;
+        }
+
+        .grade-b {
+            color: var(--B-color) !important;
+        }
+
+        .grade-b-minus {
+            color: var(--B-color) !important;
+        }
+
+        .grade-c-plus {
+            color: var(--C-color) !important;
+        }
+
+        .grade-c {
+            color: var(--C-color) !important;
+        }
+
+        .grade-c-minus {
+            color: var(--C-color) !important;
+        }
+
+        .grade-d {
+            color: var(--D-color) !important;
+        }
+
+        .grade-f {
+            color: var(--F-color) !important;
+        }
+
         /* Mobile adjustments */
+        .mobile-only {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             #sidebar {
-                width: 200px;
+                width: 220px;
             }
 
             .sidebar-button-group {
-                margin: 10px;
+                margin: 15px;
+            }
+            
+            #content {
+                padding: 15px;
+            }
+            
+            section {
+                padding: 20px;
             }
         }
 
         @media (max-width: 600px) {
+            .mobile-only {
+                display: block;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 0 10px;
+            }
+            
             #sidebar {
                 position: fixed;
                 width: 100%;
                 height: auto;
-                z-index: 100;
-                border-bottom: 1px solid var(--border-color);
+                z-index: 1001;
+                transform: translateY(-100%);
+                transition: transform 0.3s ease;
+                max-height: 80vh;
+                overflow-y: auto;
+                top: 0;
             }
-
+            
+            #sidebar.active {
+                transform: translateY(0);
+                display: block !important;
+            }
+            
             #container {
                 flex-direction: column;
             }
-
+            
             #content {
                 margin-left: 0 !important;
-                padding-top: 80px; /* to avoid overlap with sidebar now on top */
+                padding: 15px;
             }
-
+            
             #sidebar h2 {
-                display: none;
+                display: block;
+                padding: 15px 0;
+            }
+            
+            .mobile-close {
+                position: absolute;
+                top: 15px;
+                right: 20px;
+                font-size: 24px;
+                cursor: pointer;
+                color: var(--text-color);
             }
         }
     </style>
@@ -318,6 +451,7 @@
 <body>
     <header>
         <div class="title">Grade Tracker</div>
+        <div id="mobile-menu-toggle" class="mobile-only">☰</div>
         <div style="font-size:14px;">built by Reuven Sash</div>
     </header>
     <div id="login-container" style="display:none;">
@@ -331,6 +465,7 @@
     </div>
     <div id="container">
         <div id="sidebar" style="display:none;">
+            <div class="mobile-close" id="mobile-menu-close">×</div>
             <h2>Your Classes</h2>
             <div class="sidebar-button-group">
                 <button id="add-class-btn" class="button">Add New Class</button>
@@ -367,11 +502,11 @@
         // ===== Firebase Initialization =====
         const firebaseConfig = {
             apiKey: "AIzaSyCxpYrGFjIlHQovBD-44riu96AZ50L3YUo",
-  authDomain: "yof-tracker.firebaseapp.com",
-  projectId: "yof-tracker",
-  storageBucket: "yof-tracker.firebasestorage.app",
-  messagingSenderId: "867007397664",
-  appId: "1:867007397664:web:9cbccc410443d6581a2145"
+            authDomain: "yof-tracker.firebaseapp.com",
+            projectId: "yof-tracker",
+            storageBucket: "yof-tracker.firebasestorage.app",
+            messagingSenderId: "867007397664",
+            appId: "1:867007397664:web:9cbccc410443d6581a2145"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -384,6 +519,25 @@
         let dataLoaded = false;
         let currentUser = null;
         let isAdmin = false;
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.add('active');
+        });
+
+        document.getElementById('mobile-menu-close').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('active');
+        });
+
+        // Hide sidebar when clicking on content area in mobile view
+        document.getElementById('content').addEventListener('click', function() {
+            if(window.innerWidth <= 600) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('active');
+            }
+        });
 
         auth.onAuthStateChanged(async user => {
             if (user) {
@@ -435,15 +589,20 @@
             document.getElementById('content').style.display = 'block';
             document.getElementById('admin-controls').style.display = 'block';
 
-            const snapshot = await db.collection('gradeTracker').get();
-            const userSelect = document.getElementById('user-select');
-            userSelect.innerHTML = '<option value="">--Select a user--</option>';
-            snapshot.forEach(doc => {
-              const opt = document.createElement('option');
-              opt.value = doc.id;
-              opt.textContent = doc.id;
-              userSelect.appendChild(opt);
-            });
+            try {
+                const snapshot = await db.collection('gradeTracker').get();
+                const userSelect = document.getElementById('user-select');
+                userSelect.innerHTML = '<option value="">--Select a user--</option>';
+                snapshot.forEach(doc => {
+                  const opt = document.createElement('option');
+                  opt.value = doc.id;
+                  opt.textContent = doc.id;
+                  userSelect.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Error loading users:", error);
+                alert("Failed to load users: " + error.message);
+            }
         }
 
         document.getElementById('login-button').onclick = async function() {
@@ -457,43 +616,60 @@
         };
 
         document.getElementById('logout-button').onclick = async function() {
-            await auth.signOut();
+            try {
+                await auth.signOut();
+            } catch (error) {
+                console.error("Error signing out:", error);
+                alert("Failed to sign out: " + error.message);
+            }
         };
 
         document.getElementById('switch-user-button').onclick = async function() {
-          const selectedUserId = document.getElementById('user-select').value;
-          if (!selectedUserId) {
-            alert('Please select a user');
-            return;
-          }
-          docRef = db.collection('gradeTracker').doc(selectedUserId);
-          await loadDataFromFirestore();
+            const selectedUserId = document.getElementById('user-select').value;
+            if (!selectedUserId) {
+                alert('Please select a user');
+                return;
+            }
+            docRef = db.collection('gradeTracker').doc(selectedUserId);
+            await loadDataFromFirestore();
         };
 
         async function loadDataFromFirestore() {
-            const docSnap = await docRef.get();
-            if (docSnap.exists) {
-                const data = docSnap.data();
-                classes = data.classes || [];
-                semesters = data.semesters || [];
-            } else {
-                classes = [];
-                semesters = [];
-            }
-            dataLoaded = true;
-            renderClassList();
-            if (classes.length > 0) {
-                const firstClassLi = document.querySelector('#class-list li');
-                if (firstClassLi) firstClassLi.classList.add('active');
-                renderClassContent(0);
-            } else {
-                document.getElementById('content').innerHTML = '';
+            try {
+                const docSnap = await docRef.get();
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    classes = data.classes || [];
+                    semesters = data.semesters || [];
+                } else {
+                    classes = [];
+                    semesters = [];
+                    // Initialize document with empty data
+                    await docRef.set({ classes: [], semesters: [] });
+                }
+                dataLoaded = true;
+                renderClassList();
+                if (classes.length > 0) {
+                    const firstClassLi = document.querySelector('#class-list li');
+                    if (firstClassLi) firstClassLi.classList.add('active');
+                    renderClassContent(0);
+                } else {
+                    document.getElementById('content').innerHTML = '<h2>Welcome!</h2><p>Get started by adding your first class using the "Add New Class" button.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading data:", error);
+                alert("Failed to load data: " + error.message);
             }
         }
 
         async function saveData() {
             if (!dataLoaded || !docRef) return;
-            await docRef.set({ classes, semesters });
+            try {
+                await docRef.set({ classes, semesters });
+            } catch (error) {
+                console.error("Error saving data:", error);
+                alert("Failed to save data: " + error.message);
+            }
         }
 
         /*============================
@@ -523,7 +699,7 @@
             // Check if categories total 100
             let totalWeight = cls.categories.reduce((sum, cat) => sum + Number(cat.weight), 0);
             let categoryWarning = '';
-            if (totalWeight !== 100) {
+            if (totalWeight !== 100 && cls.categories.length > 0) {
                 categoryWarning = `
                     <p class="error">
                         Warning: Categories total ${totalWeight}%. They should total 100% for accurate final grading.
@@ -541,15 +717,15 @@
                     <h3>Categories</h3>
                     ${categoryWarning}
                     <div id="category-list"></div>
-                    <div style="margin-top:10px;">
-                        <button class="button small" style="margin-top:10px;" onclick="addCategory(${classIndex})">Add Category</button>
+                    <div style="margin-top:15px;">
+                        <button class="button small" onclick="addCategory(${classIndex})">Add Category</button>
                     </div>
                     <span id="category-error" class="error"></span>
                 </section>
                 <section>
                     <h3>Assignments</h3>
                     <div id="assignment-list"></div>
-                    <button class="button" onclick="addAssignment(${classIndex})">Add Assignment</button>
+                    <button class="button" style="margin-top:15px;" onclick="addAssignment(${classIndex})">Add Assignment</button>
                     <span id="assignment-error" class="error"></span>
                 </section>
                 <section id="grade-summary-section">
@@ -584,7 +760,7 @@
           if (classes.length > 0) {
               renderClassContent(0);
           } else {
-              document.getElementById('content').innerHTML = '';
+              document.getElementById('content').innerHTML = '<h2>Welcome!</h2><p>Get started by adding your first class using the "Add New Class" button.</p>';
           }
         }
 
@@ -618,14 +794,16 @@
             const content = document.getElementById('content');
             content.innerHTML = `
                 <h2>Edit Class</h2>
-                <label>Class Name</label>
-                <input type="text" id="edit-class-name" value="${cls.name}">
-                <label>Credits (default is 1)</label>
-                <input type="number" id="edit-class-credits" value="${cls.credits}" min="0.1" step="0.1">
-                <div style="margin-top:20px;">
-                    <button class="button" onclick="saveEditedClass(${classIndex})">Save</button>
-                    <button class="button accent" onclick="renderClassContent(${classIndex})">Cancel</button>
-                </div>
+                <section>
+                    <label>Class Name</label>
+                    <input type="text" id="edit-class-name" value="${cls.name}">
+                    <label>Credits (default is 1)</label>
+                    <input type="number" id="edit-class-credits" value="${cls.credits}" min="0.1" step="0.1">
+                    <div style="margin-top:20px;">
+                        <button class="button" onclick="saveEditedClass(${classIndex})">Save</button>
+                        <button class="button accent" onclick="renderClassContent(${classIndex})">Cancel</button>
+                    </div>
+                </section>
             `;
         }
 
@@ -652,7 +830,12 @@
                 classes.splice(classIndex, 1);
                 await saveData();
                 renderClassList();
-                document.getElementById('content').innerHTML = '';
+                if (classes.length > 0) {
+                    document.querySelectorAll('#class-list li')[0].classList.add('active');
+                    renderClassContent(0);
+                } else {
+                    document.getElementById('content').innerHTML = '<h2>Welcome!</h2><p>Get started by adding your first class using the "Add New Class" button.</p>';
+                }
             }
         }
 
@@ -663,6 +846,10 @@
         function addCategory(classIndex) {
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'category';
+            categoryDiv.style.backgroundColor = '#222';
+            categoryDiv.style.padding = '15px';
+            categoryDiv.style.borderRadius = '8px';
+            categoryDiv.style.marginBottom = '15px';
 
             categoryDiv.innerHTML = `
                 <label>Category Name</label>
@@ -671,7 +858,7 @@
                 <input type="number" placeholder="e.g., 20" min="0" max="100">
                 <label>Number of Lowest Grades to Drop</label>
                 <input type="number" placeholder="e.g., 1" min="0" step="1">
-                <div style="margin-top:10px;">
+                <div style="margin-top:15px;">
                     <button class="button small" onclick="saveCategory(${classIndex}, this)">Save</button>
                     <button class="button accent small" onclick="renderCategories(${classIndex})">Cancel</button>
                 </div>
@@ -717,16 +904,30 @@
             const categoryList = document.getElementById('category-list');
             categoryList.innerHTML = '';
             if (!cls.categories) cls.categories = [];
+            
+            if (cls.categories.length === 0) {
+                categoryList.innerHTML = '<p>No categories added yet. Add a category to organize your assignments.</p>';
+                return;
+            }
+            
             cls.categories.forEach((cat, index) => {
                 const div = document.createElement('div');
                 div.className = 'category';
-                div.style.marginBottom = '10px';
+                div.style.backgroundColor = '#222';
+                div.style.padding = '15px';
+                div.style.borderRadius = '8px';
+                div.style.marginBottom = '15px';
                 div.innerHTML = `
-                    <strong>${cat.name}</strong> - Weight: ${cat.weight}% 
-                    ${cat.numToDrop > 0 ? `<em>(Drop Lowest ${cat.numToDrop})</em>` : ''}
-                    <div style="margin-top:5px;">
-                        <button class="button small" onclick="editCategory(${classIndex}, ${index})">Edit</button>
-                        <button class="button accent small" onclick="deleteCategory(${classIndex}, ${index})">Delete</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 16px;">${cat.name}</strong>
+                            <p style="margin: 5px 0;">Weight: ${cat.weight}% 
+                            ${cat.numToDrop > 0 ? `<em>(Drop Lowest ${cat.numToDrop})</em>` : ''}</p>
+                        </div>
+                        <div>
+                            <button class="button small" onclick="editCategory(${classIndex}, ${index})">Edit</button>
+                            <button class="button accent small" onclick="deleteCategory(${classIndex}, ${index})">Delete</button>
+                        </div>
                     </div>
                 `;
                 categoryList.appendChild(div);
@@ -739,6 +940,10 @@
 
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'category';
+            categoryDiv.style.backgroundColor = '#222';
+            categoryDiv.style.padding = '15px';
+            categoryDiv.style.borderRadius = '8px';
+            categoryDiv.style.marginBottom = '15px';
 
             categoryDiv.innerHTML = `
                 <label>Category Name</label>
@@ -747,7 +952,7 @@
                 <input type="number" min="0" max="100" value="${cat.weight}">
                 <label>Number of Lowest Grades to Drop</label>
                 <input type="number" min="0" step="1" value="${cat.numToDrop || 0}">
-                <div style="margin-top:10px;">
+                <div style="margin-top:15px;">
                     <button class="button small" onclick="saveEditedCategory(${classIndex}, ${categoryIndex}, this)">Save</button>
                     <button class="button accent small" onclick="renderCategories(${classIndex})">Cancel</button>
                 </div>
@@ -826,7 +1031,7 @@
             }
             const categoryOptions = cls.categories.map((cat, index) => `<option value="${index}">${cat.name}</option>`).join('');
             const assignmentHTML = `
-                <div class="assignment" style="margin-top:10px;">
+                <div class="assignment" style="background-color: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                     <label>Assignment Name</label>
                     <input type="text" placeholder="e.g., Quiz 1">
                     <label>Category</label>
@@ -835,10 +1040,10 @@
                     </select>
                     <label>Score (or leave blank if incomplete) e.g. 18/25</label>
                     <input type="text" placeholder="e.g., 18/25">
-                    <label style="margin-top:5px;">
+                    <label style="margin-top:10px;">
                         <input type="checkbox"> Exclude from Grade
                     </label>
-                    <div style="margin-top:10px;">
+                    <div style="margin-top:15px;">
                         <button class="button small" onclick="saveAssignment(${classIndex}, this)">Save</button>
                         <button class="button accent small" onclick="renderAssignments(${classIndex})">Cancel</button>
                     </div>
@@ -864,7 +1069,7 @@
                 score = Number(parts[0]);
                 total = Number(parts[1]);
                 if (isNaN(score) || isNaN(total) || total === 0) {
-                    alert('Invalid score format.');
+                    alert('Invalid score format. Please use format like "18/25".');
                     return;
                 }
             }
@@ -912,10 +1117,31 @@
             table.appendChild(tbody);
 
             cls.assignments.forEach((assignment, index) => {
-                const catName = cls.categories[assignment.categoryIndex].name;
+                // Ensure the categoryIndex is valid
+                if (assignment.categoryIndex >= cls.categories.length) {
+                    assignment.categoryIndex = 0; // Reset to first category if invalid
+                }
+                
+                const catName = cls.categories[assignment.categoryIndex]?.name || 'Unknown';
                 let percentage = '';
+                let gradeClass = '';
+                
                 if (assignment.score !== null && assignment.total !== null) {
-                    percentage = ((assignment.score / assignment.total) * 100).toFixed(2) + '%';
+                    const pct = (assignment.score / assignment.total) * 100;
+                    percentage = pct.toFixed(2) + '%';
+                    
+                    // Add grade coloring
+                    if (pct >= 96.5) gradeClass = 'grade-a-plus';
+                    else if (pct >= 92.5) gradeClass = 'grade-a';
+                    else if (pct >= 89.5) gradeClass = 'grade-a-minus';
+                    else if (pct >= 86.5) gradeClass = 'grade-b-plus';
+                    else if (pct >= 82.5) gradeClass = 'grade-b';
+                    else if (pct >= 79.5) gradeClass = 'grade-b-minus';
+                    else if (pct >= 76.5) gradeClass = 'grade-c-plus';
+                    else if (pct >= 72.5) gradeClass = 'grade-c';
+                    else if (pct >= 69.5) gradeClass = 'grade-c-minus';
+                    else if (pct >= 64.5) gradeClass = 'grade-d';
+                    else gradeClass = 'grade-f';
                 } else {
                     percentage = '<em>Incomplete</em>';
                 }
@@ -934,7 +1160,7 @@
                     <td>${catName}</td>
                     <td>${assignment.score === null ? '—' : assignment.score}</td>
                     <td>${assignment.total === null ? '—' : assignment.total}</td>
-                    <td>${percentage}</td>
+                    <td class="${gradeClass}">${percentage}</td>
                     <td>
                         <button class="button small" onclick="editAssignment(${classIndex}, ${index})">Edit</button>
                         <button class="button accent small" onclick="deleteAssignment(${classIndex}, ${index})">Delete</button>
@@ -1013,10 +1239,10 @@
                         </select>
                         <label>Score (blank if incomplete)</label>
                         <input type="text" value="${scoreText}">
-                        <label style="margin-top:5px;">
+                        <label style="margin-top:10px;">
                             <input type="checkbox" ${assignment.exclude ? 'checked' : ''}> Exclude from Grade
                         </label>
-                        <div style="margin-top:10px;">
+                        <div style="margin-top:15px;">
                             <button class="button small" onclick="saveEditedAssignment(${classIndex}, ${assignmentIndex}, this)">Save</button>
                             <button class="button accent small" onclick="renderAssignments(${classIndex})">Cancel</button>
                         </div>
@@ -1044,7 +1270,7 @@
                 score = Number(parts[0]);
                 total = Number(parts[1]);
                 if (isNaN(score) || isNaN(total) || total === 0) {
-                    alert('Invalid score format.');
+                    alert('Invalid score format. Please use format like "18/25".');
                     return;
                 }
             }
@@ -1085,8 +1311,14 @@
 
             const assignmentsInCategory = cls.assignments
                 .map((a, i) => ({...a, index: i}))
-                .filter(a => a.categoryIndex === categoryIndex && !a.exclude && a.score !== null && a.total !== null);
+                .filter(a => 
+                    a.categoryIndex === categoryIndex && 
+                    !a.exclude && 
+                    a.score !== null && 
+                    a.total !== null
+                );
 
+            // If there are fewer or equal assignments than numToDrop, don't drop any
             if (assignmentsInCategory.length <= numToDrop) return false;
 
             assignmentsInCategory.sort((a, b) => {
@@ -1099,18 +1331,18 @@
             return droppedAssignments.some(a => a.index === assignmentIndex);
         }
 
-        // === The letter-grade scale with .5 cutoffs (the old scale) ===
-        // A+: >= 96.5
-        // A : >= 92.5
-        // A-: >= 89.5
-        // B+: >= 86.5
-        // B : >= 82.5
-        // B-: >= 79.5
-        // C+: >= 76.5
-        // C : >= 72.5
-        // C-: >= 69.5
-        // D : >= 64.5
-        // F : below 64.5
+        // === Updated GPA scale ===
+        // A+: >= 96.5 = 4.33
+        // A : >= 92.5 = 4.0
+        // A-: >= 89.5 = 3.67
+        // B+: >= 86.5 = 3.33
+        // B : >= 82.5 = 3.0
+        // B-: >= 79.5 = 2.67
+        // C+: >= 76.5 = 2.33
+        // C : >= 72.5 = 2.0
+        // C-: >= 69.5 = 1.67
+        // D : >= 64.5 = 1.0
+        // F : below 64.5 = 0.0
 
         function calculateGrade(classIndex) {
             const cls = classes[classIndex];
@@ -1147,19 +1379,37 @@
                 }
             });
 
-            const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights).toFixed(2) : 0;
+            // Handle case when totalWeights is 0
+            const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights).toFixed(2) : '0.00';
             const letterGrade = getLetterGrade(finalGrade);
             const gpaScale = getGPA(finalGrade).toFixed(2);
 
+            // Determine grade class for coloring
+            let gradeClass = '';
+            if (finalGrade >= 96.5) gradeClass = 'grade-a-plus';
+            else if (finalGrade >= 92.5) gradeClass = 'grade-a';
+            else if (finalGrade >= 89.5) gradeClass = 'grade-a-minus';
+            else if (finalGrade >= 86.5) gradeClass = 'grade-b-plus';
+            else if (finalGrade >= 82.5) gradeClass = 'grade-b';
+            else if (finalGrade >= 79.5) gradeClass = 'grade-b-minus';
+            else if (finalGrade >= 76.5) gradeClass = 'grade-c-plus';
+            else if (finalGrade >= 72.5) gradeClass = 'grade-c';
+            else if (finalGrade >= 69.5) gradeClass = 'grade-c-minus';
+            else if (finalGrade >= 64.5) gradeClass = 'grade-d';
+            else gradeClass = 'grade-f';
+
             const gradeSummary = document.getElementById('grade-summary');
-            let categoryAverageHTML = '<h4>Category Averages:</h4><ul>';
+            let categoryAverageHTML = '<h4>Category Averages:</h4><ul style="list-style-type: none; padding-left: 0;">';
             for (const [catName, avg] of Object.entries(categoryAverages)) {
-                categoryAverageHTML += `<li>${catName}: ${avg}</li>`;
+                categoryAverageHTML += `<li><strong>${catName}:</strong> ${avg}</li>`;
             }
             categoryAverageHTML += '</ul>';
 
             gradeSummary.innerHTML = `
-                <p>Your current grade is: <strong>${finalGrade}% (${letterGrade}, GPA: ${gpaScale})</strong></p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0;">Your current grade is:</h4> 
+                    <div class="${gradeClass}" style="font-size: 24px; font-weight: bold;">${finalGrade}% (${letterGrade}, GPA: ${gpaScale})</div>
+                </div>
                 ${categoryAverageHTML}
             `;
         }
@@ -1181,47 +1431,45 @@
 
         function getGPA(percentage) {
             percentage = Number(percentage);
-            if (percentage >= 96.5) return 4.0;
-            if (percentage >= 92.5) return 3.7;
-            if (percentage >= 89.5) return 3.3;
-            if (percentage >= 86.5) return 3.0;
-            if (percentage >= 82.5) return 2.7;
-            if (percentage >= 79.5) return 2.3;
-            if (percentage >= 76.5) return 2.0;
-            if (percentage >= 72.5) return 1.7;
-            if (percentage >= 69.5) return 1.3;
+            if (percentage >= 96.5) return 4.33;
+            if (percentage >= 92.5) return 4.0;
+            if (percentage >= 89.5) return 3.67;
+            if (percentage >= 86.5) return 3.33;
+            if (percentage >= 82.5) return 3.0;
+            if (percentage >= 79.5) return 2.67;
+            if (percentage >= 76.5) return 2.33;
+            if (percentage >= 72.5) return 2.0;
+            if (percentage >= 69.5) return 1.67;
             if (percentage >= 64.5) return 1.0;
             return 0.0;
         }
 
         function getPercentageFromGPA(gpa) {
-            // Approximate midpoints for display (matching the old scale)
-            // Note: These are just used in the GPA Calculator summary 
-            // to show an approximate "percentage" from a GPA value.
-            if (gpa === 4.0) return 98;    // A+
-            if (gpa === 3.7) return 94;    // A
-            if (gpa === 3.3) return 90;    // A-
-            if (gpa === 3.0) return 87;    // B+
-            if (gpa === 2.7) return 84;    // B
-            if (gpa === 2.3) return 80;    // B-
-            if (gpa === 2.0) return 77;    // C+
-            if (gpa === 1.7) return 74;    // C
-            if (gpa === 1.3) return 70;    // C-
-            if (gpa === 1.0) return 65;    // D
-            return 60;                     // F
+            // Approximate midpoints for display
+            if (gpa === 4.33) return 98;    // A+
+            if (gpa === 4.0) return 94;     // A
+            if (gpa === 3.67) return 90;    // A-
+            if (gpa === 3.33) return 87;    // B+
+            if (gpa === 3.0) return 84;     // B
+            if (gpa === 2.67) return 80;    // B-
+            if (gpa === 2.33) return 77;    // C+
+            if (gpa === 2.0) return 74;     // C
+            if (gpa === 1.67) return 70;    // C-
+            if (gpa === 1.0) return 65;     // D
+            return 60;                      // F
         }
 
         function getLetterGradeFromGPA(gpa) {
             gpa = Number(gpa);
-            if (gpa === 4.0) return 'A+';
-            if (gpa === 3.7) return 'A';
-            if (gpa === 3.3) return 'A-';
-            if (gpa === 3.0) return 'B+';
-            if (gpa === 2.7) return 'B';
-            if (gpa === 2.3) return 'B-';
-            if (gpa === 2.0) return 'C+';
-            if (gpa === 1.7) return 'C';
-            if (gpa === 1.3) return 'C-';
+            if (gpa === 4.33) return 'A+';
+            if (gpa === 4.0) return 'A';
+            if (gpa === 3.67) return 'A-';
+            if (gpa === 3.33) return 'B+';
+            if (gpa === 3.0) return 'B';
+            if (gpa === 2.67) return 'B-';
+            if (gpa === 2.33) return 'C+';
+            if (gpa === 2.0) return 'C';
+            if (gpa === 1.67) return 'C-';
             if (gpa === 1.0) return 'D';
             return 'F';
         }
@@ -1333,12 +1581,17 @@
                         semesters = importedData.semesters;
                         await saveData();
                         renderClassList();
-                        document.getElementById('content').innerHTML = '';
+                        if (classes.length > 0) {
+                            renderClassContent(0);
+                        } else {
+                            document.getElementById('content').innerHTML = '<h2>No classes found</h2><p>Import file contained no classes. Please add a class or import a different file.</p>';
+                        }
                         alert('Data imported successfully.');
                     } else {
                         throw new Error('Invalid data format.');
                     }
                 } catch (error) {
+                    console.error("Import error:", error);
                     alert('Failed to import data: ' + error.message);
                 }
             };
@@ -1373,10 +1626,15 @@
         function addSemester() {
             const semesterDiv = document.createElement('div');
             semesterDiv.className = 'semester';
+            semesterDiv.style.backgroundColor = '#222';
+            semesterDiv.style.padding = '15px';
+            semesterDiv.style.borderRadius = '8px';
+            semesterDiv.style.marginBottom = '15px';
+            
             semesterDiv.innerHTML = `
                 <label>Semester Name</label>
                 <input type="text" placeholder="e.g., Fall 2023">
-                <div style="margin-top:10px;">
+                <div style="margin-top:15px;">
                     <button class="button small" onclick="saveSemester(this)">Save</button>
                     <button class="button accent small" onclick="this.parentElement.parentElement.remove()">Cancel</button>
                 </div>
@@ -1405,18 +1663,28 @@
         function renderSemesters() {
             const semesterList = document.getElementById('semester-list');
             semesterList.innerHTML = '';
+            
+            if (semesters.length === 0) {
+                semesterList.innerHTML = '<p>No semesters added yet. Add a semester to track your GPA across terms.</p>';
+            }
+            
             semesters.forEach((semester, sIndex) => {
                 const semesterDiv = document.createElement('div');
                 semesterDiv.className = 'semester';
-                semesterDiv.style.marginBottom = '20px';
+                semesterDiv.style.backgroundColor = '#1e1e1e';
+                semesterDiv.style.padding = '15px';
+                semesterDiv.style.borderRadius = '8px';
+                semesterDiv.style.marginBottom = '25px';
+                semesterDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                
                 semesterDiv.innerHTML = `
                     <h3>${semester.name}</h3>
                     <div id="class-list-${sIndex}"></div>
-                    <div style="margin-top:10px;">
+                    <div style="margin-top:15px;">
                         <button class="button small" onclick="addClassToSemester(${sIndex})">Add Class</button>
                         <button class="button accent small" onclick="deleteSemester(${sIndex})">Delete Semester</button>
                     </div>
-                    <hr>
+                    <hr style="margin: 15px 0; border-color: #333;">
                 `;
                 semesterList.appendChild(semesterDiv);
                 renderClassesInSemester(sIndex);
@@ -1426,6 +1694,11 @@
         function addClassToSemester(sIndex) {
             const classDiv = document.createElement('div');
             classDiv.className = 'class';
+            classDiv.style.backgroundColor = '#222';
+            classDiv.style.padding = '15px';
+            classDiv.style.borderRadius = '8px';
+            classDiv.style.marginBottom = '15px';
+            
             classDiv.innerHTML = `
                 <label>Class Name</label>
                 <input type="text" placeholder="e.g., Chemistry">
@@ -1433,19 +1706,19 @@
                 <input type="number" placeholder="e.g., 1" min="0.1" step="0.1">
                 <label>Letter Grade</label>
                 <select>
-                    <option value="4.0">A+</option>
-                    <option value="3.7">A</option>
-                    <option value="3.3">A-</option>
-                    <option value="3.0">B+</option>
-                    <option value="2.7">B</option>
-                    <option value="2.3">B-</option>
-                    <option value="2.0">C+</option>
-                    <option value="1.7">C</option>
-                    <option value="1.3">C-</option>
+                    <option value="4.33">A+</option>
+                    <option value="4.0">A</option>
+                    <option value="3.67">A-</option>
+                    <option value="3.33">B+</option>
+                    <option value="3.0">B</option>
+                    <option value="2.67">B-</option>
+                    <option value="2.33">C+</option>
+                    <option value="2.0">C</option>
+                    <option value="1.67">C-</option>
                     <option value="1.0">D</option>
                     <option value="0.0">F</option>
                 </select>
-                <div style="margin-top:10px;">
+                <div style="margin-top:15px;">
                     <button class="button small" onclick="saveClassInSemester(${sIndex}, this)">Save</button>
                     <button class="button accent small" onclick="this.parentElement.parentElement.remove()">Cancel</button>
                 </div>
@@ -1486,13 +1759,45 @@
             const semester = semesters[sIndex];
             const classListDiv = document.getElementById(`class-list-${sIndex}`);
             classListDiv.innerHTML = '';
+            
+            if (!semester.classes || semester.classes.length === 0) {
+                classListDiv.innerHTML = '<p>No classes added yet.</p>';
+                return;
+            }
+            
             semester.classes.forEach((cls, cIndex) => {
                 const div = document.createElement('div');
                 div.className = 'class';
-                div.style.marginBottom = '10px';
+                div.style.margin = '10px 0';
+                div.style.padding = '10px';
+                div.style.backgroundColor = '#2a2a2a';
+                div.style.borderRadius = '5px';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                
+                // Determine grade class for coloring
+                let gradeClass = '';
+                const gpaNum = parseFloat(cls.gpa);
+                if (gpaNum === 4.33) gradeClass = 'grade-a-plus';
+                else if (gpaNum === 4.0) gradeClass = 'grade-a';
+                else if (gpaNum === 3.67) gradeClass = 'grade-a-minus';
+                else if (gpaNum === 3.33) gradeClass = 'grade-b-plus';
+                else if (gpaNum === 3.0) gradeClass = 'grade-b';
+                else if (gpaNum === 2.67) gradeClass = 'grade-b-minus';
+                else if (gpaNum === 2.33) gradeClass = 'grade-c-plus';
+                else if (gpaNum === 2.0) gradeClass = 'grade-c';
+                else if (gpaNum === 1.67) gradeClass = 'grade-c-minus';
+                else if (gpaNum === 1.0) gradeClass = 'grade-d';
+                else gradeClass = 'grade-f';
+                
                 div.innerHTML = `
-                    <strong>${cls.name}</strong> - ${cls.letterGrade} (GPA: ${cls.gpa}, Credits: ${cls.credits})
-                    <div style="margin-top:5px;">
+                    <div>
+                        <strong>${cls.name}</strong> - 
+                        <span class="${gradeClass}">${cls.letterGrade}</span> 
+                        (GPA: ${cls.gpa}, Credits: ${cls.credits})
+                    </div>
+                    <div>
                         <button class="button small" onclick="editClassInSemester(${sIndex}, ${cIndex})">Edit</button>
                         <button class="button accent small" onclick="deleteClassInSemester(${sIndex}, ${cIndex})">Delete</button>
                     </div>
@@ -1507,6 +1812,11 @@
 
             const classDiv = document.createElement('div');
             classDiv.className = 'class';
+            classDiv.style.backgroundColor = '#222';
+            classDiv.style.padding = '15px';
+            classDiv.style.borderRadius = '8px';
+            classDiv.style.marginBottom = '15px';
+            
             classDiv.innerHTML = `
                 <label>Class Name</label>
                 <input type="text" value="${cls.name}">
@@ -1514,19 +1824,19 @@
                 <input type="number" value="${cls.credits}" min="0.1" step="0.1">
                 <label>Letter Grade</label>
                 <select>
-                    <option value="4.0"  ${cls.gpa === '4.00' ? 'selected' : ''}>A+</option>
-                    <option value="3.7"  ${cls.gpa === '3.70' ? 'selected' : ''}>A</option>
-                    <option value="3.3"  ${cls.gpa === '3.30' ? 'selected' : ''}>A-</option>
-                    <option value="3.0"  ${cls.gpa === '3.00' ? 'selected' : ''}>B+</option>
-                    <option value="2.7"  ${cls.gpa === '2.70' ? 'selected' : ''}>B</option>
-                    <option value="2.3"  ${cls.gpa === '2.30' ? 'selected' : ''}>B-</option>
-                    <option value="2.0"  ${cls.gpa === '2.00' ? 'selected' : ''}>C+</option>
-                    <option value="1.7"  ${cls.gpa === '1.70' ? 'selected' : ''}>C</option>
-                    <option value="1.3"  ${cls.gpa === '1.30' ? 'selected' : ''}>C-</option>
+                    <option value="4.33" ${cls.gpa === '4.33' ? 'selected' : ''}>A+</option>
+                    <option value="4.0"  ${cls.gpa === '4.00' ? 'selected' : ''}>A</option>
+                    <option value="3.67" ${cls.gpa === '3.67' ? 'selected' : ''}>A-</option>
+                    <option value="3.33" ${cls.gpa === '3.33' ? 'selected' : ''}>B+</option>
+                    <option value="3.0"  ${cls.gpa === '3.00' ? 'selected' : ''}>B</option>
+                    <option value="2.67" ${cls.gpa === '2.67' ? 'selected' : ''}>B-</option>
+                    <option value="2.33" ${cls.gpa === '2.33' ? 'selected' : ''}>C+</option>
+                    <option value="2.0"  ${cls.gpa === '2.00' ? 'selected' : ''}>C</option>
+                    <option value="1.67" ${cls.gpa === '1.67' ? 'selected' : ''}>C-</option>
                     <option value="1.0"  ${cls.gpa === '1.00' ? 'selected' : ''}>D</option>
                     <option value="0.0"  ${cls.gpa === '0.00' ? 'selected' : ''}>F</option>
                 </select>
-                <div style="margin-top:10px;">
+                <div style="margin-top:15px;">
                     <button class="button small" onclick="saveEditedClassInSemester(${sIndex}, ${cIndex}, this)">Save</button>
                     <button class="button accent small" onclick="renderClassesInSemester(${sIndex})">Cancel</button>
                 </div>
@@ -1611,9 +1921,27 @@
 
                 const averageSemesterGPA = semesterCredits > 0 ? (semesterQualityPoints / semesterCredits).toFixed(2) : 'N/A';
                 const averageSemesterPercentage = semesterCredits > 0 ? (semesterPercentagePoints / semesterCredits).toFixed(2) : 'N/A';
+                
+                // Determine grade class for coloring
+                let gradeClass = '';
+                if (averageSemesterGPA >= 4.33) gradeClass = 'grade-a-plus';
+                else if (averageSemesterGPA >= 4.0) gradeClass = 'grade-a';
+                else if (averageSemesterGPA >= 3.67) gradeClass = 'grade-a-minus';
+                else if (averageSemesterGPA >= 3.33) gradeClass = 'grade-b-plus';
+                else if (averageSemesterGPA >= 3.0) gradeClass = 'grade-b';
+                else if (averageSemesterGPA >= 2.67) gradeClass = 'grade-b-minus';
+                else if (averageSemesterGPA >= 2.33) gradeClass = 'grade-c-plus';
+                else if (averageSemesterGPA >= 2.0) gradeClass = 'grade-c';
+                else if (averageSemesterGPA >= 1.67) gradeClass = 'grade-c-minus';
+                else if (averageSemesterGPA >= 1.0) gradeClass = 'grade-d';
+                else gradeClass = 'grade-f';
 
                 cumulativeGPADiv.innerHTML += `
-                    <h4>${semester.name} GPA: ${averageSemesterGPA}, Percentage: ${averageSemesterPercentage}%</h4>
+                    <div style="margin-bottom: 10px;">
+                        <strong>${semester.name} GPA:</strong> 
+                        <span class="${gradeClass}">${averageSemesterGPA}</span>, 
+                        Percentage: ${averageSemesterPercentage}%
+                    </div>
                 `;
             });
 
@@ -1655,8 +1983,27 @@
                 if (currentSemesterCredits > 0) {
                     const averageCurrentGPA = (currentSemesterQualityPoints / currentSemesterCredits).toFixed(2);
                     const averageCurrentPercentage = (currentSemesterPercentagePoints / currentSemesterCredits).toFixed(2);
+                    
+                    // Determine grade class for coloring
+                    let gradeClass = '';
+                    if (averageCurrentGPA >= 4.33) gradeClass = 'grade-a-plus';
+                    else if (averageCurrentGPA >= 4.0) gradeClass = 'grade-a';
+                    else if (averageCurrentGPA >= 3.67) gradeClass = 'grade-a-minus';
+                    else if (averageCurrentGPA >= 3.33) gradeClass = 'grade-b-plus';
+                    else if (averageCurrentGPA >= 3.0) gradeClass = 'grade-b';
+                    else if (averageCurrentGPA >= 2.67) gradeClass = 'grade-b-minus';
+                    else if (averageCurrentGPA >= 2.33) gradeClass = 'grade-c-plus';
+                    else if (averageCurrentGPA >= 2.0) gradeClass = 'grade-c';
+                    else if (averageCurrentGPA >= 1.67) gradeClass = 'grade-c-minus';
+                    else if (averageCurrentGPA >= 1.0) gradeClass = 'grade-d';
+                    else gradeClass = 'grade-f';
+                    
                     cumulativeGPADiv.innerHTML += `
-                        <h4>Current Semester GPA: ${averageCurrentGPA}, Percentage: ${averageCurrentPercentage}%</h4>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Current Semester GPA:</strong> 
+                            <span class="${gradeClass}">${averageCurrentGPA}</span>, 
+                            Percentage: ${averageCurrentPercentage}%
+                        </div>
                     `;
                     totalQualityPoints += currentSemesterQualityPoints;
                     totalCredits += currentSemesterCredits;
@@ -1667,8 +2014,25 @@
             // Final Cumulative
             const cumulativeGPA = totalCredits > 0 ? (totalQualityPoints / totalCredits).toFixed(2) : 'N/A';
             const cumulativePercentage = totalCredits > 0 ? (totalPercentagePoints / totalCredits).toFixed(2) : 'N/A';
+            
+            // Determine grade class for coloring
+            let finalGradeClass = '';
+            if (cumulativeGPA >= 4.33) finalGradeClass = 'grade-a-plus';
+            else if (cumulativeGPA >= 4.0) finalGradeClass = 'grade-a';
+            else if (cumulativeGPA >= 3.67) finalGradeClass = 'grade-a-minus';
+            else if (cumulativeGPA >= 3.33) finalGradeClass = 'grade-b-plus';
+            else if (cumulativeGPA >= 3.0) finalGradeClass = 'grade-b';
+            else if (cumulativeGPA >= 2.67) finalGradeClass = 'grade-b-minus';
+            else if (cumulativeGPA >= 2.33) finalGradeClass = 'grade-c-plus';
+            else if (cumulativeGPA >= 2.0) finalGradeClass = 'grade-c';
+            else if (cumulativeGPA >= 1.67) finalGradeClass = 'grade-c-minus';
+            else if (cumulativeGPA >= 1.0) finalGradeClass = 'grade-d';
+            else finalGradeClass = 'grade-f';
+            
             cumulativeGPADiv.innerHTML += `
-                <h3>Cumulative GPA: ${cumulativeGPA}, Percentage: ${cumulativePercentage}%</h3>
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #444;">
+                    <h3>Cumulative GPA: <span class="${finalGradeClass}">${cumulativeGPA}</span>, Percentage: ${cumulativePercentage}%</h3>
+                </div>
             `;
         }
 
