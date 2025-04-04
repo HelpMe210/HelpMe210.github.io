@@ -25,11 +25,18 @@
             --warning-color: #ff9800;
             --transition-speed: 0.2s;
             --table-row-hover: #2c2f33;
-            --A-color: #4caf50;
-            --B-color: #8bc34a;
-            --C-color: #ffeb3b;
-            --D-color: #ff9800;
-            --F-color: #f44336;
+            /* Improved grade color scheme */
+            --A-plus-color: #00c853;
+            --A-color: #2ecc71;
+            --A-minus-color: #4caf50;
+            --B-plus-color: #03a9f4;
+            --B-color: #2196f3;
+            --B-minus-color: #1976d2;
+            --C-plus-color: #ffc107;
+            --C-color: #ffa000;
+            --C-minus-color: #ff8f00;
+            --D-color: #ff5722;
+            --F-color: #d32f2f;
         }
 
         body {
@@ -329,55 +336,199 @@
             border: 1px solid var(--border-color);
         }
 
-        /* Grade coloring */
+        /* Grade coloring - completely revised color gradient */
         .grade-a-plus {
-            color: var(--A-color) !important;
+            color: #00c853 !important; /* Bright green */
             font-weight: bold;
         }
 
         .grade-a {
-            color: var(--A-color) !important;
+            color: #2ecc71 !important; /* Green */
+            font-weight: bold;
         }
 
         .grade-a-minus {
-            color: var(--A-color) !important;
+            color: #4caf50 !important; /* Light green */
         }
 
         .grade-b-plus {
-            color: var(--B-color) !important;
+            color: #cddc39 !important; /* Lime */
         }
 
         .grade-b {
-            color: var(--B-color) !important;
+            color: #ffeb3b !important; /* Yellow */
         }
 
         .grade-b-minus {
-            color: var(--B-color) !important;
+            color: #ffc107 !important; /* Amber */
         }
 
         .grade-c-plus {
-            color: var(--C-color) !important;
+            color: #ff9800 !important; /* Orange */
         }
 
         .grade-c {
-            color: var(--C-color) !important;
+            color: #ff7043 !important; /* Deep orange */
         }
 
         .grade-c-minus {
-            color: var(--C-color) !important;
+            color: #ff5722 !important; /* Red-orange */
         }
 
         .grade-d {
-            color: var(--D-color) !important;
+            color: #f44336 !important; /* Red */
         }
 
         .grade-f {
-            color: var(--F-color) !important;
+            color: #d32f2f !important; /* Deep red */
+            font-weight: bold;
         }
 
-        /* Mobile adjustments */
+        /* Mobile adjustments - improved responsive design */
         .mobile-only {
             display: none;
+        }
+        
+        /* New chart styles */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden; /* Prevent overflow */
+        }
+        
+        .insight-card {
+            background: #252525;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-left: 4px solid var(--accent-color);
+            transition: transform 0.3s ease; /* Animation for cards */
+        }
+        
+        .insight-card:hover {
+            transform: translateY(-3px); /* Animation effect */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .insight-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+        
+        .personal-best {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease; /* Animation for cards */
+        }
+        
+        .personal-best:hover {
+            transform: scale(1.02); /* Slight scale effect on hover */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        
+        .personal-best::after {
+            content: '🏆';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            opacity: 0.5;
+            transition: all 0.3s ease; /* Trophy animation */
+        }
+        
+        .personal-best:hover::after {
+            opacity: 1;
+            transform: translateY(-50%) rotate(10deg); /* Rotate trophy on hover */
+        }
+        
+        .course-comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .course-card {
+            flex: 1 1 200px;
+            background: #252525;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            position: relative; /* For absolute positioning of credit info */
+        }
+        
+        .course-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .credit-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        .course-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            padding-right: 60px; /* Make room for credit badge */
+        }
+        
+        .login-header {
+            margin-bottom: 25px;
+            color: var(--text-color);
+        }
+        
+        .login-footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Status labels for assignments */
+        .status-label {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        
+        .status-excluded {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        .status-dropped {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+        }
+        
+        /* Grade without drops mini indicator */
+        .grade-without-drops {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            display: inline-block;
+            padding: 2px 6px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
         }
 
         @media (max-width: 768px) {
@@ -396,9 +547,28 @@
             section {
                 padding: 20px;
             }
+            
+            .button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .course-comparison {
+                flex-direction: column;
+            }
+            
+            .course-card {
+                flex: none;
+                width: 100%;
+            }
         }
 
         @media (max-width: 600px) {
+            body {
+                overflow-x: hidden;
+                width: 100%;
+            }
+            
             .mobile-only {
                 display: block;
                 font-size: 24px;
@@ -425,11 +595,15 @@
             
             #container {
                 flex-direction: column;
+                width: 100%;
+                overflow-x: hidden;
             }
             
             #content {
                 margin-left: 0 !important;
                 padding: 15px;
+                width: 100%;
+                box-sizing: border-box;
             }
             
             #sidebar h2 {
@@ -444,6 +618,80 @@
                 font-size: 24px;
                 cursor: pointer;
                 color: var(--text-color);
+                display: block;
+            }
+            
+            /* Improved mobile action buttons */
+            .action-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                justify-content: flex-end;
+                padding: 8px 8px 8px 50% !important;
+            }
+            
+            td.action-buttons button {
+                margin: 0 !important;
+                padding: 6px !important;
+                font-size: 11px !important;
+                min-width: 0 !important;
+                flex: 0 0 auto !important;
+                width: auto !important;
+            }
+            
+            /* Make tables responsive on mobile */
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            tr {
+                margin-bottom: 15px;
+                border-radius: 8px;
+                background: #1a1a1a;
+                padding: 10px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            }
+            
+            td {
+                border: none;
+                position: relative;
+                padding: 8px 8px 8px 50%;
+                text-align: right;
+                border-bottom: 1px solid #333;
+            }
+            
+            td:last-child {
+                border-bottom: none;
+            }
+            
+            td:before {
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                white-space: nowrap;
+                font-weight: bold;
+                text-align: left;
+            }
+            
+            /* Add labels for mobile table view */
+            td:nth-of-type(1):before { content: "Name"; }
+            td:nth-of-type(2):before { content: "Category"; }
+            td:nth-of-type(3):before { content: "Score"; }
+            td:nth-of-type(4):before { content: "Total"; }
+            td:nth-of-type(5):before { content: "Percentage"; }
+            td:nth-of-type(6):before { content: "Actions"; }
+        }
+        
+        /* Don't show mobile close button on desktop */
+        @media (min-width: 601px) {
+            .mobile-close {
+                display: none;
             }
         }
     </style>
@@ -455,13 +703,19 @@
         <div style="font-size:14px;">built by Reuven Sash</div>
     </header>
     <div id="login-container" style="display:none;">
-        <h2>Login</h2>
+        <div class="login-header">
+            <h2 style="font-size: 28px; margin-bottom: 10px;">Grade Tracker</h2>
+            <p style="color: var(--text-muted);">Track your academic progress with ease</p>
+        </div>
         <label>Email</label>
-        <input type="email" id="login-email" placeholder="Email" />
+        <input type="email" id="login-email" placeholder="Enter your email" />
         <label>Password</label>
-        <input type="password" id="login-password" placeholder="Password" />
-        <button id="login-button" class="button">Login</button>
+        <input type="password" id="login-password" placeholder="Enter your password" />
+        <button id="login-button" class="button" style="width: 100%; margin-top: 10px;">Sign In</button>
         <div id="login-error" class="error"></div>
+        <div class="login-footer">
+            <p>Built by Reuven Sash</p>
+        </div>
     </div>
     <div id="container">
         <div id="sidebar" style="display:none;">
@@ -490,13 +744,16 @@
         <div id="content" style="display:none;"></div>
     </div>
     <footer>
-        Built by Reuven Sash + ChatGPT
+        Built by Reuven Sash
     </footer>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 
     <script>
         // ===== Firebase Initialization =====
@@ -519,6 +776,11 @@
         let dataLoaded = false;
         let currentUser = null;
         let isAdmin = false;
+        // Arrays to store historical grade data and personal bests
+        let gradeHistory = [];
+        let personalBests = [];
+        // Chart objects
+        let gradeChart = null;
 
         // Mobile menu toggle
         document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
@@ -534,6 +796,14 @@
         // Hide sidebar when clicking on content area in mobile view
         document.getElementById('content').addEventListener('click', function() {
             if(window.innerWidth <= 600) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('active');
+            }
+        });
+        
+        // Close sidebar when a class is selected on mobile
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#class-list li') && window.innerWidth <= 600) {
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.remove('active');
             }
@@ -641,11 +911,20 @@
                     const data = docSnap.data();
                     classes = data.classes || [];
                     semesters = data.semesters || [];
+                    gradeHistory = data.gradeHistory || [];
+                    personalBests = data.personalBests || [];
                 } else {
                     classes = [];
                     semesters = [];
+                    gradeHistory = [];
+                    personalBests = [];
                     // Initialize document with empty data
-                    await docRef.set({ classes: [], semesters: [] });
+                    await docRef.set({ 
+                        classes: [], 
+                        semesters: [],
+                        gradeHistory: [],
+                        personalBests: []
+                    });
                 }
                 dataLoaded = true;
                 renderClassList();
@@ -654,7 +933,23 @@
                     if (firstClassLi) firstClassLi.classList.add('active');
                     renderClassContent(0);
                 } else {
-                    document.getElementById('content').innerHTML = '<h2>Welcome!</h2><p>Get started by adding your first class using the "Add New Class" button.</p>';
+                    document.getElementById('content').innerHTML = `
+                        <h2>Welcome to Grade Tracker!</h2>
+                        <section>
+                            <p>Get started by adding your first class using the "Add New Class" button in the sidebar.</p>
+                            <p>This app will help you:</p>
+                            <ul>
+                                <li>Track assignments and calculate your current grade</li>
+                                <li>View historical grade progress</li>
+                                <li>Get insights about your academic performance</li>
+                                <li>Track personal achievements and improvements</li>
+                                <li>Compare performance across different courses</li>
+                            </ul>
+                            <div style="margin-top: 20px;">
+                                <button class="button" onclick="addClass()">Add Your First Class</button>
+                            </div>
+                        </section>
+                    `;
                 }
             } catch (error) {
                 console.error("Error loading data:", error);
@@ -665,10 +960,230 @@
         async function saveData() {
             if (!dataLoaded || !docRef) return;
             try {
-                await docRef.set({ classes, semesters });
+                // Record snapshot for grade history when saving
+                recordGradeSnapshot("Manual Save");
+                await docRef.set({ 
+                    classes, 
+                    semesters,
+                    gradeHistory,
+                    personalBests
+                });
             } catch (error) {
                 console.error("Error saving data:", error);
                 alert("Failed to save data: " + error.message);
+            }
+        }
+        
+        // Function to record a snapshot of current grades for the historical graph
+        function recordGradeSnapshot(eventType, details = {}) {
+            const timestamp = new Date();
+            
+            // For each class, calculate the current grade and record it
+            classes.forEach((cls, index) => {
+                let totalWeightedScore = 0;
+                let totalWeights = 0;
+                
+                // Calculate the current grade percentage
+                cls.categories.forEach((cat, catIndex) => {
+                    const grades = cls.assignments
+                        .filter(a => 
+                            a.categoryIndex === catIndex && 
+                            !a.exclude && 
+                            !isAssignmentDropped(cls, catIndex, cls.assignments.indexOf(a)) && 
+                            a.score !== null && 
+                            a.total !== null
+                        )
+                        .map(a => (a.score / a.total) * 100);
+                    
+                    if (grades.length > 0) {
+                        const average = grades.reduce((a, b) => a + b, 0) / grades.length;
+                        totalWeightedScore += (average * cat.weight);
+                        totalWeights += cat.weight;
+                    }
+                });
+                
+                const finalGrade = totalWeights > 0 ? (totalWeightedScore / totalWeights) : 0;
+                
+                // Create snapshot object
+                const snapshot = {
+                    timestamp: timestamp,
+                    classId: index,
+                    className: cls.name,
+                    grade: finalGrade,
+                    eventType: eventType,
+                    details: details
+                };
+                
+                // Only record if we have a valid grade
+                if (finalGrade > 0) {
+                    // Initialize if not exists
+                    if (!gradeHistory) gradeHistory = [];
+                    
+                    // Add to history
+                    gradeHistory.push(snapshot);
+                    
+                    // Check for personal bests
+                    checkForPersonalBests(cls, index, finalGrade);
+                }
+            });
+            
+            // Limit history size (keep last 100 entries)
+            if (gradeHistory && gradeHistory.length > 100) {
+                gradeHistory = gradeHistory.slice(-100);
+            }
+        }
+        
+        // Function to check for and record personal bests
+        function checkForPersonalBests(cls, classIndex, currentGrade) {
+            // Initialize if not exists
+            if (!personalBests) personalBests = [];
+            
+            const existingBestForClass = personalBests.find(pb => 
+                pb.type === 'highest_overall' && pb.classId === classIndex);
+            
+            // Check for new overall highest grade
+            if (!existingBestForClass || currentGrade > existingBestForClass.value) {
+                // Remove old best if exists
+                if (existingBestForClass) {
+                    personalBests = personalBests.filter(pb => 
+                        !(pb.type === 'highest_overall' && pb.classId === classIndex));
+                }
+                
+                // Add new best
+                personalBests.push({
+                    type: 'highest_overall',
+                    classId: classIndex,
+                    className: cls.name,
+                    value: currentGrade,
+                    timestamp: new Date(),
+                    description: `Highest overall grade in ${cls.name}`
+                });
+            }
+            
+            // Check for category bests
+            cls.categories.forEach((cat, catIndex) => {
+                const gradesInCategory = cls.assignments
+                    .filter(a => 
+                        a.categoryIndex === catIndex && 
+                        !a.exclude && 
+                        a.score !== null && 
+                        a.total !== null
+                    );
+                
+                if (gradesInCategory.length > 0) {
+                    // Calculate average for this category
+                    const catGrades = gradesInCategory.map(a => (a.score / a.total) * 100);
+                    const catAverage = catGrades.reduce((a, b) => a + b, 0) / catGrades.length;
+                    
+                    // Check if this is a new best for this category
+                    const existingCatBest = personalBests.find(pb => 
+                        pb.type === 'highest_category' && 
+                        pb.classId === classIndex && 
+                        pb.categoryId === catIndex);
+                    
+                    if (!existingCatBest || catAverage > existingCatBest.value) {
+                        // Remove old best if exists
+                        if (existingCatBest) {
+                            personalBests = personalBests.filter(pb => 
+                                !(pb.type === 'highest_category' && 
+                                  pb.classId === classIndex && 
+                                  pb.categoryId === catIndex));
+                        }
+                        
+                        // Add new best
+                        personalBests.push({
+                            type: 'highest_category',
+                            classId: classIndex,
+                            className: cls.name,
+                            categoryId: catIndex,
+                            categoryName: cat.name,
+                            value: catAverage,
+                            timestamp: new Date(),
+                            description: `Highest average in ${cat.name} for ${cls.name}`
+                        });
+                    }
+                    
+                    // Check for best individual assignment
+                    const bestAssignment = gradesInCategory.reduce((best, current) => {
+                        const currentPercent = (current.score / current.total) * 100;
+                        return (currentPercent > best.percent) ? 
+                            { percent: currentPercent, assignment: current } : 
+                            best;
+                    }, { percent: 0, assignment: null });
+                    
+                    if (bestAssignment.assignment) {
+                        const existingAssignmentBest = personalBests.find(pb => 
+                            pb.type === 'highest_assignment' && 
+                            pb.classId === classIndex && 
+                            pb.categoryId === catIndex);
+                        
+                        if (!existingAssignmentBest || bestAssignment.percent > existingAssignmentBest.value) {
+                            // Remove old best if exists
+                            if (existingAssignmentBest) {
+                                personalBests = personalBests.filter(pb => 
+                                    !(pb.type === 'highest_assignment' && 
+                                      pb.classId === classIndex && 
+                                      pb.categoryId === catIndex));
+                            }
+                            
+                            // Add new best
+                            personalBests.push({
+                                type: 'highest_assignment',
+                                classId: classIndex,
+                                className: cls.name,
+                                categoryId: catIndex,
+                                categoryName: cat.name,
+                                assignmentName: bestAssignment.assignment.name,
+                                value: bestAssignment.percent,
+                                timestamp: new Date(),
+                                description: `Highest score on ${bestAssignment.assignment.name} in ${cls.name}`
+                            });
+                        }
+                    }
+                }
+            });
+            
+            // Check for streak (consecutive assignments above 90%)
+            let currentStreak = 0;
+            let maxStreak = 0;
+            
+            // Sort assignments by date added (we're using index as a proxy for time)
+            const sortedAssignments = [...cls.assignments]
+                .filter(a => !a.exclude && a.score !== null && a.total !== null)
+                .sort((a, b) => cls.assignments.indexOf(a) - cls.assignments.indexOf(b));
+            
+            for (const assignment of sortedAssignments) {
+                const percent = (assignment.score / assignment.total) * 100;
+                if (percent >= 90) {
+                    currentStreak++;
+                    maxStreak = Math.max(maxStreak, currentStreak);
+                } else {
+                    currentStreak = 0;
+                }
+            }
+            
+            // Check if this is a new best streak
+            if (maxStreak >= 3) { // Only count streaks of 3 or more
+                const existingStreak = personalBests.find(pb => 
+                    pb.type === 'best_streak' && pb.classId === classIndex);
+                
+                if (!existingStreak || maxStreak > existingStreak.value) {
+                    // Remove old streak if exists
+                    if (existingStreak) {
+                        personalBests = personalBests.filter(pb => 
+                            !(pb.type === 'best_streak' && pb.classId === classIndex));
+                    }
+                    
+                    // Add new streak
+                    personalBests.push({
+                        type: 'best_streak',
+                        classId: classIndex,
+                        className: cls.name,
+                        value: maxStreak,
+                        timestamp: new Date(),
+                        description: `${maxStreak} assignments in a row above 90% in ${cls.name}`
+                    });
+                }
             }
         }
 
@@ -709,10 +1224,40 @@
 
             content.innerHTML = `
                 <h2>${cls.name}</h2>
-                <div style="margin-bottom:20px;">
+                <div style="margin-bottom:20px;" class="button-group">
                     <button class="button" onclick="editClass(${classIndex})">Edit Class</button>
                     <button class="button accent small" onclick="deleteClass(${classIndex})">Delete</button>
                 </div>
+                
+                <section id="grade-summary-section">
+                    <h3>Current Grade</h3>
+                    <div id="grade-summary"></div>
+                </section>
+                
+                <section>
+                    <h3>Assignments</h3>
+                    <div id="assignment-list"></div>
+                    <button class="button" style="margin-top:15px;" onclick="addAssignment(${classIndex})">Add Assignment</button>
+                    <span id="assignment-error" class="error"></span>
+                </section>
+                
+                <section>
+                    <h3>Grade History</h3>
+                    <div class="chart-container">
+                        <canvas id="gradeHistoryChart"></canvas>
+                    </div>
+                </section>
+                
+                <section>
+                    <h3>Smart Insights</h3>
+                    <div id="grade-insights"></div>
+                </section>
+                
+                <section>
+                    <h3>Personal Bests</h3>
+                    <div id="personal-bests"></div>
+                </section>
+                
                 <section>
                     <h3>Categories</h3>
                     ${categoryWarning}
@@ -721,16 +1266,6 @@
                         <button class="button small" onclick="addCategory(${classIndex})">Add Category</button>
                     </div>
                     <span id="category-error" class="error"></span>
-                </section>
-                <section>
-                    <h3>Assignments</h3>
-                    <div id="assignment-list"></div>
-                    <button class="button" style="margin-top:15px;" onclick="addAssignment(${classIndex})">Add Assignment</button>
-                    <span id="assignment-error" class="error"></span>
-                </section>
-                <section id="grade-summary-section">
-                    <h3>Current Grade</h3>
-                    <div id="grade-summary"></div>
                 </section>
             `;
 
@@ -1084,8 +1619,18 @@
                 categoryIndex: categoryIndex,
                 score: score,
                 total: total,
-                exclude: exclude
+                exclude: exclude,
+                dateAdded: new Date()
             });
+            
+            // Record grade snapshot when adding new assignment
+            recordGradeSnapshot("New Assignment", {
+                assignmentName: name,
+                score: score,
+                total: total,
+                category: cls.categories[categoryIndex].name
+            });
+            
             await saveData();
             renderAssignments(classIndex);
             calculateGrade(classIndex);
@@ -1098,6 +1643,24 @@
             if (!cls.assignments || cls.assignments.length === 0) {
                 assignmentList.innerHTML = '<p>No assignments added yet.</p>';
                 return;
+            }
+
+            // Calculate original grade without drops for info
+            const assignmentsToBeDropped = findAssignmentsToBeDropped(cls);
+            const wouldBeDropped = new Set(assignmentsToBeDropped);
+            
+            // Calculate difference between with and without drops
+            let originalGrade = 0;
+            let dropAdjustedGrade = 0;
+            let gradeDifference = 0;
+            
+            if (assignmentsToBeDropped.length > 0) {
+                const withoutDropsData = calculateGradeData(cls, []);
+                const withDropsData = calculateGradeData(cls, assignmentsToBeDropped);
+                
+                originalGrade = withoutDropsData.finalGrade.toFixed(2);
+                dropAdjustedGrade = withDropsData.finalGrade.toFixed(2);
+                gradeDifference = (withDropsData.finalGrade - withoutDropsData.finalGrade).toFixed(2);
             }
 
             const table = document.createElement('table');
@@ -1147,21 +1710,26 @@
                 }
 
                 const tr = document.createElement('tr');
-
+                
+                // Status labels for clarity
+                let statusLabel = '';
+                
                 // Exclude / dropped highlight
                 if (assignment.exclude) {
                     tr.classList.add('excluded-manual');
-                } else if (isAssignmentDropped(cls, assignment.categoryIndex, index)) {
+                    statusLabel = '<span class="status-label status-excluded">Excluded</span>';
+                } else if (wouldBeDropped.has(index)) {
                     tr.classList.add('excluded-dropped');
+                    statusLabel = '<span class="status-label status-dropped">Dropped</span>';
                 }
 
                 tr.innerHTML = `
-                    <td>${assignment.name} ${assignment.exclude ? '<em>(Excluded)</em>' : ''}</td>
+                    <td>${assignment.name} ${statusLabel}</td>
                     <td>${catName}</td>
                     <td>${assignment.score === null ? '—' : assignment.score}</td>
                     <td>${assignment.total === null ? '—' : assignment.total}</td>
                     <td class="${gradeClass}">${percentage}</td>
-                    <td>
+                    <td class="action-buttons">
                         <button class="button small" onclick="editAssignment(${classIndex}, ${index})">Edit</button>
                         <button class="button accent small" onclick="deleteAssignment(${classIndex}, ${index})">Delete</button>
                         <button class="button small" onclick="moveAssignmentUp(${classIndex}, ${index})" ${index === 0 ? 'disabled' : ''}>↑</button>
@@ -1170,7 +1738,133 @@
                 `;
                 tbody.appendChild(tr);
             });
+            
             assignmentList.appendChild(table);
+            
+            // Add grade without drops indicator if applicable
+            if (gradeDifference !== 0) {
+                const gradeInfo = document.createElement('div');
+                gradeInfo.className = 'grade-without-drops';
+                const diffText = gradeDifference > 0 ? 
+                    `Drops improved grade by ${gradeDifference}%` :
+                    `Drops lowered grade by ${Math.abs(gradeDifference)}%`;
+                    
+                gradeInfo.textContent = `Without drops: ${originalGrade}% | ${diffText}`;
+                
+                // Add to the grade summary section instead of assignment list
+                const gradeElement = document.querySelector('#grade-summary');
+                if (gradeElement) {
+                    gradeElement.appendChild(gradeInfo);
+                }
+            }
+            
+            // Add animation to rows for visual appeal
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((row, i) => {
+                row.style.animation = `fadeIn 0.3s ease forwards ${i * 0.05}s`;
+                row.style.opacity = '0';
+            });
+            
+            // Add animation keyframes if not already added
+            if (!document.getElementById('row-animation-style')) {
+                const style = document.createElement('style');
+                style.id = 'row-animation-style';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // Function to find assignments that would be dropped
+        function findAssignmentsToBeDropped(cls) {
+            const droppedAssignments = [];
+            
+            cls.categories.forEach((cat, categoryIndex) => {
+                const numToDrop = cat.numToDrop || 0;
+                if (numToDrop <= 0) return;
+                
+                // Get non-excluded assignments in this category
+                const assignmentsInCategory = cls.assignments
+                    .map((a, i) => ({...a, index: i}))
+                    .filter(a => 
+                        a.categoryIndex === categoryIndex && 
+                        !a.exclude && 
+                        a.score !== null && 
+                        a.total !== null
+                    );
+                
+                if (assignmentsInCategory.length <= numToDrop) return;
+                
+                // Sort by percentage (lowest first)
+                assignmentsInCategory.sort((a, b) => {
+                    const aPerc = a.score / a.total;
+                    const bPerc = b.score / b.total;
+                    return aPerc - bPerc;
+                });
+                
+                // Get indices of assignments to drop
+                const toDrop = assignmentsInCategory.slice(0, numToDrop).map(a => a.index);
+                droppedAssignments.push(...toDrop);
+            });
+            
+            return droppedAssignments;
+        }
+        
+        // Calculate grade difference with and without drops
+        function calculateGradeDifference(cls, droppedIndices) {
+            // First calculate grade WITH drops (normal calculation)
+            const withDropsData = calculateGradeData(cls, droppedIndices);
+            
+            // Then calculate WITHOUT drops
+            const withoutDropsData = calculateGradeData(cls, []);
+            
+            // Return the difference
+            return withDropsData.finalGrade - withoutDropsData.finalGrade;
+        }
+        
+        // Calculate grade based on which assignments to drop
+        function calculateGradeData(cls, droppedIndices) {
+            const dropSet = new Set(droppedIndices);
+            const categoryGrades = {};
+            
+            cls.categories.forEach((cat, index) => {
+                categoryGrades[index] = [];
+            });
+            
+            cls.assignments.forEach((assignment, index) => {
+                if (
+                    !assignment.exclude && 
+                    !dropSet.has(index) && 
+                    assignment.score !== null && 
+                    assignment.total !== null
+                ) {
+                    categoryGrades[assignment.categoryIndex].push((assignment.score / assignment.total) * 100);
+                }
+            });
+            
+            let totalWeightedScore = 0;
+            let totalWeights = 0;
+            
+            cls.categories.forEach((cat, index) => {
+                const grades = categoryGrades[index];
+                if (grades && grades.length > 0) {
+                    const average = grades.reduce((a, b) => a + b, 0) / grades.length;
+                    totalWeightedScore += (average * cat.weight);
+                    totalWeights += cat.weight;
+                }
+            });
+            
+            const finalGrade = totalWeights > 0 ? totalWeightedScore / totalWeights : 0;
+            
+            return {
+                finalGrade,
+                totalWeightedScore,
+                totalWeights
+            };
         }
 
         async function moveAssignmentUp(classIndex, assignmentIndex) {
@@ -1179,16 +1873,36 @@
                 // Grab table rows to animate
                 const tbody = document.querySelector('#assignment-list tbody');
                 const rows = tbody.querySelectorAll('tr');
-                rows[assignmentIndex].classList.add('move-animation');
-                rows[assignmentIndex - 1].classList.add('move-animation');
-
-                // Reorder in array
-                const temp = cls.assignments[assignmentIndex];
-                cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
-                cls.assignments[assignmentIndex - 1] = temp;
-
-                await saveData();
-                renderAssignments(classIndex);
+                
+                // Apply animations
+                if (rows[assignmentIndex] && rows[assignmentIndex - 1]) {
+                    rows[assignmentIndex].classList.add('move-animation');
+                    rows[assignmentIndex - 1].classList.add('move-animation');
+                    
+                    rows[assignmentIndex].style.transform = 'translateY(-100%)';
+                    rows[assignmentIndex - 1].style.transform = 'translateY(100%)';
+                    
+                    // Wait for animation to complete
+                    setTimeout(() => {
+                        // Reorder in array
+                        const temp = cls.assignments[assignmentIndex];
+                        cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
+                        cls.assignments[assignmentIndex - 1] = temp;
+                        
+                        saveData().then(() => {
+                            renderAssignments(classIndex);
+                            calculateGrade(classIndex);
+                        });
+                    }, 300);
+                } else {
+                    // Fallback without animation
+                    const temp = cls.assignments[assignmentIndex];
+                    cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
+                    cls.assignments[assignmentIndex - 1] = temp;
+                    
+                    await saveData();
+                    renderAssignments(classIndex);
+                }
             }
         }
 
@@ -1198,16 +1912,36 @@
                 // Grab table rows to animate
                 const tbody = document.querySelector('#assignment-list tbody');
                 const rows = tbody.querySelectorAll('tr');
-                rows[assignmentIndex].classList.add('move-animation');
-                rows[assignmentIndex + 1].classList.add('move-animation');
-
-                // Reorder in array
-                const temp = cls.assignments[assignmentIndex];
-                cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
-                cls.assignments[assignmentIndex + 1] = temp;
-
-                await saveData();
-                renderAssignments(classIndex);
+                
+                // Apply animations
+                if (rows[assignmentIndex] && rows[assignmentIndex + 1]) {
+                    rows[assignmentIndex].classList.add('move-animation');
+                    rows[assignmentIndex + 1].classList.add('move-animation');
+                    
+                    rows[assignmentIndex].style.transform = 'translateY(100%)';
+                    rows[assignmentIndex + 1].style.transform = 'translateY(-100%)';
+                    
+                    // Wait for animation to complete
+                    setTimeout(() => {
+                        // Reorder in array
+                        const temp = cls.assignments[assignmentIndex];
+                        cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
+                        cls.assignments[assignmentIndex + 1] = temp;
+                        
+                        saveData().then(() => {
+                            renderAssignments(classIndex);
+                            calculateGrade(classIndex);
+                        });
+                    }, 300);
+                } else {
+                    // Fallback without animation
+                    const temp = cls.assignments[assignmentIndex];
+                    cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
+                    cls.assignments[assignmentIndex + 1] = temp;
+                    
+                    await saveData();
+                    renderAssignments(classIndex);
+                }
             }
         }
 
@@ -1280,11 +2014,31 @@
                 return;
             }
 
+            // Track changes for history
+            const oldScore = assignment.score;
+            const oldTotal = assignment.total;
+            const oldCategoryIndex = assignment.categoryIndex;
+            
+            // Update assignment
             assignment.name = name;
             assignment.categoryIndex = categoryIndex;
             assignment.score = score;
             assignment.total = total;
             assignment.exclude = exclude;
+            assignment.dateModified = new Date();
+            
+            // Record grade snapshot if score changed
+            if (oldScore !== score || oldTotal !== total || oldCategoryIndex !== categoryIndex) {
+                recordGradeSnapshot("Updated Assignment", {
+                    assignmentName: name,
+                    oldScore: oldScore,
+                    oldTotal: oldTotal,
+                    newScore: score,
+                    newTotal: total,
+                    category: cls.categories[categoryIndex].name
+                });
+            }
+            
             await saveData();
             renderAssignments(classIndex);
             calculateGrade(classIndex);
@@ -1293,10 +2047,53 @@
         async function deleteAssignment(classIndex, assignmentIndex) {
             if (confirm('Are you sure you want to delete this assignment?')) {
                 const cls = classes[classIndex];
+                
+                // Record the deletion for history
+                const assignment = cls.assignments[assignmentIndex];
+                recordGradeSnapshot("Deleted Assignment", {
+                    assignmentName: assignment.name,
+                    score: assignment.score,
+                    total: assignment.total,
+                    category: cls.categories[assignment.categoryIndex].name
+                });
+                
+                // Actually remove the assignment
                 cls.assignments.splice(assignmentIndex, 1);
                 await saveData();
-                renderAssignments(classIndex);
-                calculateGrade(classIndex);
+                
+                // Animation for the deleted row
+                const table = document.querySelector('#assignment-list table');
+                if (table) {
+                    const rows = table.querySelectorAll('tbody tr');
+                    if (rows[assignmentIndex]) {
+                        rows[assignmentIndex].style.animation = 'deleteAnimation 0.5s ease forwards';
+                        
+                        // Add animation keyframes if not already added
+                        if (!document.getElementById('delete-animation-style')) {
+                            const style = document.createElement('style');
+                            style.id = 'delete-animation-style';
+                            style.textContent = `
+                                @keyframes deleteAnimation {
+                                    0% { transform: translateX(0); opacity: 1; }
+                                    100% { transform: translateX(50px); opacity: 0; }
+                                }
+                            `;
+                            document.head.appendChild(style);
+                        }
+                        
+                        // Delay actual re-render to allow animation to complete
+                        setTimeout(() => {
+                            renderAssignments(classIndex);
+                            calculateGrade(classIndex);
+                        }, 500);
+                    } else {
+                        renderAssignments(classIndex);
+                        calculateGrade(classIndex);
+                    }
+                } else {
+                    renderAssignments(classIndex);
+                    calculateGrade(classIndex);
+                }
             }
         }
 
@@ -1399,19 +2196,456 @@
             else gradeClass = 'grade-f';
 
             const gradeSummary = document.getElementById('grade-summary');
-            let categoryAverageHTML = '<h4>Category Averages:</h4><ul style="list-style-type: none; padding-left: 0;">';
+            let categoryAverageHTML = '<div style="margin-top: 15px;"><h4>Category Averages:</h4><ul style="list-style-type: none; padding-left: 0;">';
             for (const [catName, avg] of Object.entries(categoryAverages)) {
-                categoryAverageHTML += `<li><strong>${catName}:</strong> ${avg}</li>`;
+                let avgClass = '';
+                if (avg !== 'No Assignments') {
+                    const avgNum = parseFloat(avg);
+                    if (avgNum >= 96.5) avgClass = 'grade-a-plus';
+                    else if (avgNum >= 92.5) avgClass = 'grade-a';
+                    else if (avgNum >= 89.5) avgClass = 'grade-a-minus';
+                    else if (avgNum >= 86.5) avgClass = 'grade-b-plus';
+                    else if (avgNum >= 82.5) avgClass = 'grade-b';
+                    else if (avgNum >= 79.5) avgClass = 'grade-b-minus';
+                    else if (avgNum >= 76.5) avgClass = 'grade-c-plus';
+                    else if (avgNum >= 72.5) avgClass = 'grade-c';
+                    else if (avgNum >= 69.5) avgClass = 'grade-c-minus';
+                    else if (avgNum >= 64.5) avgClass = 'grade-d';
+                    else avgClass = 'grade-f';
+                }
+                categoryAverageHTML += `<li><strong>${catName}:</strong> <span class="${avgClass}">${avg}</span></li>`;
             }
-            categoryAverageHTML += '</ul>';
+            categoryAverageHTML += '</ul></div>';
 
             gradeSummary.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4 style="margin: 0;">Your current grade is:</h4> 
-                    <div class="${gradeClass}" style="font-size: 24px; font-weight: bold;">${finalGrade}% (${letterGrade}, GPA: ${gpaScale})</div>
+                <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <div style="font-size: 18px; margin-bottom: 5px;">Your current grade is:</div>
+                    <div class="${gradeClass}" style="font-size: 48px; font-weight: bold; margin-bottom: 10px;">${finalGrade}%</div>
+                    <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                        <div style="padding: 8px 15px; background: #1e1e1e; border-radius: 20px;">
+                            <strong>Letter Grade:</strong> <span class="${gradeClass}">${letterGrade}</span>
+                        </div>
+                        <div style="padding: 8px 15px; background: #1e1e1e; border-radius: 20px;">
+                            <strong>GPA:</strong> <span class="${gradeClass}">${gpaScale}</span>
+                        </div>
+                    </div>
                 </div>
                 ${categoryAverageHTML}
             `;
+            
+            // Render History Chart
+            renderGradeHistory(classIndex);
+            
+            // Generate and Display Insights
+            generateInsights(classIndex);
+            
+            // Display Personal Bests
+            displayPersonalBests(classIndex);
+        }
+        
+        function renderGradeHistory(classIndex) {
+            const filteredHistory = gradeHistory.filter(entry => entry.classId === classIndex);
+            
+            if (filteredHistory.length < 1) {
+                document.querySelector('.chart-container').innerHTML = '<p>No grade data to display yet. Add assignments to see your progress over time.</p>';
+                return;
+            }
+            
+            // Sort by timestamp
+            filteredHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            // Extract data for the chart
+            const labels = filteredHistory.map(entry => {
+                const date = new Date(entry.timestamp);
+                return date.toLocaleDateString();
+            });
+            
+            const gradeData = filteredHistory.map(entry => entry.grade);
+            
+            // Destroy existing chart if there is one
+            if (gradeChart) {
+                gradeChart.destroy();
+            }
+            
+            // Handle single data point case - add dummy point at beginning
+            if (filteredHistory.length === 1) {
+                // Add a starting point slightly lower than the first grade
+                const startGrade = Math.max(0, gradeData[0] - 5);
+                const startDate = new Date(filteredHistory[0].timestamp);
+                startDate.setDate(startDate.getDate() - 7); // One week before
+                
+                // Insert at beginning
+                labels.unshift(startDate.toLocaleDateString());
+                gradeData.unshift(startGrade);
+            }
+            
+            // Create the chart
+            const ctx = document.getElementById('gradeHistoryChart').getContext('2d');
+            gradeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Grade Percentage',
+                        data: gradeData,
+                        backgroundColor: 'rgba(66, 133, 244, 0.2)',
+                        borderColor: 'rgba(66, 133, 244, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        pointBackgroundColor: 'rgba(66, 133, 244, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    animation: {
+                        duration: 1000, // Animation duration in milliseconds
+                        easing: 'easeOutQuart' // Easing function
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    // Skip the dummy point we added
+                                    if (filteredHistory.length === 1 && context.dataIndex === 0) {
+                                        return 'Starting point';
+                                    }
+                                    
+                                    const index = filteredHistory.length === 1 ? 0 : context.dataIndex;
+                                    const historyIndex = Math.min(index, filteredHistory.length - 1);
+                                    const event = filteredHistory[historyIndex].eventType;
+                                    const details = filteredHistory[historyIndex].details;
+                                    let tooltipText = `Event: ${event}`;
+                                    
+                                    if (details && Object.keys(details).length > 0) {
+                                        if (details.assignmentName) {
+                                            tooltipText += `\nAssignment: ${details.assignmentName}`;
+                                        }
+                                        if (details.score !== undefined && details.total !== undefined) {
+                                            tooltipText += `\nScore: ${details.score}/${details.total}`;
+                                        }
+                                    }
+                                    
+                                    return tooltipText;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: Math.max(0, Math.min(...gradeData) - 5),
+                            max: Math.min(100, Math.max(...gradeData) + 5),
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function generateInsights(classIndex) {
+            const cls = classes[classIndex];
+            const insightsContainer = document.getElementById('grade-insights');
+            
+            // Empty container
+            insightsContainer.innerHTML = '';
+            
+            if (!cls.assignments || cls.assignments.length < 3) {
+                insightsContainer.innerHTML = '<p>Add more assignments to get personalized insights about your performance.</p>';
+                return;
+            }
+            
+            // Create a collection of insights
+            const insights = [];
+            
+            // Get assignments with grades
+            const gradedAssignments = cls.assignments.filter(a => 
+                !a.exclude && a.score !== null && a.total !== null);
+            
+            if (gradedAssignments.length < 3) {
+                insightsContainer.innerHTML = '<p>Add more graded assignments to get personalized insights about your performance.</p>';
+                return;
+            }
+            
+            // Calculate grade percentages for each assignment
+            const assignmentPercentages = gradedAssignments.map(a => {
+                return {
+                    name: a.name,
+                    percentage: (a.score / a.total) * 100,
+                    categoryIndex: a.categoryIndex,
+                    dateAdded: a.dateAdded || new Date()
+                };
+            });
+            
+            // Sort by date (using index as proxy if date not available)
+            assignmentPercentages.sort((a, b) => {
+                if (a.dateAdded && b.dateAdded) {
+                    return new Date(a.dateAdded) - new Date(b.dateAdded);
+                }
+                return 0;
+            });
+            
+            // === INSIGHT: Recent Performance Trend ===
+            if (assignmentPercentages.length >= 3) {
+                const last3 = assignmentPercentages.slice(-3);
+                const last3Avg = last3.reduce((sum, a) => sum + a.percentage, 0) / 3;
+                
+                // Compare with previous
+                if (assignmentPercentages.length > 5) {
+                    const previous3 = assignmentPercentages.slice(-6, -3);
+                    const previous3Avg = previous3.reduce((sum, a) => sum + a.percentage, 0) / 3;
+                    const difference = last3Avg - previous3Avg;
+                    
+                    if (Math.abs(difference) >= 5) {
+                        if (difference > 0) {
+                            insights.push({
+                                title: 'Improvement Trend',
+                                content: `Your recent 3 assignments (${last3Avg.toFixed(1)}%) show a ${difference.toFixed(1)}% improvement compared to the previous 3 (${previous3Avg.toFixed(1)}%).`,
+                                type: 'positive'
+                            });
+                        } else {
+                            insights.push({
+                                title: 'Performance Dip',
+                                content: `Your recent 3 assignments (${last3Avg.toFixed(1)}%) are ${Math.abs(difference).toFixed(1)}% lower than your previous 3 (${previous3Avg.toFixed(1)}%). Consider reviewing your study habits.`,
+                                type: 'negative'
+                            });
+                        }
+                    } else {
+                        insights.push({
+                            title: 'Consistent Performance',
+                            content: `Your performance has been stable, with your recent 3 assignments (${last3Avg.toFixed(1)}%) close to your previous 3 (${previous3Avg.toFixed(1)}%).`,
+                            type: 'neutral'
+                        });
+                    }
+                }
+            }
+            
+            // === INSIGHT: Category Strengths and Weaknesses ===
+            const categoryPerformance = {};
+            cls.categories.forEach((cat, index) => {
+                const assignmentsInCategory = assignmentPercentages.filter(a => a.categoryIndex === index);
+                if (assignmentsInCategory.length > 0) {
+                    const avg = assignmentsInCategory.reduce((sum, a) => sum + a.percentage, 0) / assignmentsInCategory.length;
+                    categoryPerformance[index] = {
+                        name: cat.name,
+                        average: avg
+                    };
+                }
+            });
+            
+            // Find best and worst categories
+            const categoryIndices = Object.keys(categoryPerformance);
+            if (categoryIndices.length >= 2) {
+                // Sort by average
+                const sortedCategories = [...categoryIndices].sort((a, b) => 
+                    categoryPerformance[b].average - categoryPerformance[a].average);
+                
+                const bestCat = categoryPerformance[sortedCategories[0]];
+                const worstCat = categoryPerformance[sortedCategories[sortedCategories.length - 1]];
+                
+                if (bestCat.average - worstCat.average >= 10) {
+                    insights.push({
+                        title: 'Category Strength',
+                        content: `You're performing best in "${bestCat.name}" (${bestCat.average.toFixed(1)}%) and have room for improvement in "${worstCat.name}" (${worstCat.average.toFixed(1)}%).`,
+                        type: 'neutral'
+                    });
+                }
+            }
+            
+            // === INSIGHT: Achievement Streaks ===
+            let currentStreak = 0;
+            let streakThreshold = 85; // Count as part of streak if >=85%
+            
+            for (let i = 0; i < assignmentPercentages.length; i++) {
+                if (assignmentPercentages[i].percentage >= streakThreshold) {
+                    currentStreak++;
+                } else {
+                    // Reset streak
+                    currentStreak = 0;
+                }
+            }
+            
+            if (currentStreak >= 3) {
+                insights.push({
+                    title: 'Current Streak',
+                    content: `You're on a ${currentStreak}-assignment streak of scores above ${streakThreshold}%! Keep up the great work!`,
+                    type: 'positive'
+                });
+            }
+            
+            // === INSIGHT: Most Improved Category ===
+            if (assignmentPercentages.length >= 6) {
+                // Check for category improvement
+                const categoryImprovement = {};
+                
+                cls.categories.forEach((cat, index) => {
+                    const assignmentsInCategory = assignmentPercentages.filter(a => a.categoryIndex === index);
+                    
+                    if (assignmentsInCategory.length >= 3) {
+                        // Split into halves
+                        const halfway = Math.floor(assignmentsInCategory.length / 2);
+                        const firstHalf = assignmentsInCategory.slice(0, halfway);
+                        const secondHalf = assignmentsInCategory.slice(halfway);
+                        
+                        const firstHalfAvg = firstHalf.reduce((sum, a) => sum + a.percentage, 0) / firstHalf.length;
+                        const secondHalfAvg = secondHalf.reduce((sum, a) => sum + a.percentage, 0) / secondHalf.length;
+                        
+                        categoryImprovement[index] = {
+                            name: cat.name,
+                            improvement: secondHalfAvg - firstHalfAvg
+                        };
+                    }
+                });
+                
+                const improvementIndices = Object.keys(categoryImprovement);
+                if (improvementIndices.length > 0) {
+                    // Sort by improvement
+                    const sortedImprovement = [...improvementIndices].sort((a, b) => 
+                        categoryImprovement[b].improvement - categoryImprovement[a].improvement);
+                    
+                    const mostImproved = categoryImprovement[sortedImprovement[0]];
+                    
+                    if (mostImproved.improvement > 5) {
+                        insights.push({
+                            title: 'Most Improved',
+                            content: `You've shown the most improvement in "${mostImproved.name}" with a ${mostImproved.improvement.toFixed(1)}% increase over time!`,
+                            type: 'positive'
+                        });
+                    } else if (mostImproved.improvement < -5) {
+                        insights.push({
+                            title: 'Performance Drop',
+                            content: `Your scores in "${mostImproved.name}" have dropped by ${Math.abs(mostImproved.improvement).toFixed(1)}% over time. Consider refocusing your study efforts.`,
+                            type: 'negative'
+                        });
+                    }
+                }
+            }
+            
+            // === INSIGHT: Grade Distribution ===
+            const gradeDistribution = {
+                A: 0, // 90-100
+                B: 0, // 80-89.9
+                C: 0, // 70-79.9
+                D: 0, // 65-69.9
+                F: 0  // <65
+            };
+            
+            assignmentPercentages.forEach(a => {
+                if (a.percentage >= 90) gradeDistribution.A++;
+                else if (a.percentage >= 80) gradeDistribution.B++;
+                else if (a.percentage >= 70) gradeDistribution.C++;
+                else if (a.percentage >= 65) gradeDistribution.D++;
+                else gradeDistribution.F++;
+            });
+            
+            // Find the most common grade
+            const sortedGrades = Object.keys(gradeDistribution).sort((a, b) => 
+                gradeDistribution[b] - gradeDistribution[a]);
+            
+            const mostCommonGrade = sortedGrades[0];
+            const mostCommonCount = gradeDistribution[mostCommonGrade];
+            
+            if (mostCommonCount >= 3 && mostCommonCount / assignmentPercentages.length >= 0.4) {
+                if (mostCommonGrade === 'A') {
+                    insights.push({
+                        title: 'Grade Distribution',
+                        content: `The majority of your assignments (${mostCommonCount} out of ${assignmentPercentages.length}) earned A grades. Excellent consistency!`,
+                        type: 'positive'
+                    });
+                } else if (mostCommonGrade === 'B') {
+                    insights.push({
+                        title: 'Grade Distribution',
+                        content: `Most of your assignments (${mostCommonCount} out of ${assignmentPercentages.length}) earned B grades. Strong performance!`,
+                        type: 'positive'
+                    });
+                } else if (mostCommonGrade === 'C') {
+                    insights.push({
+                        title: 'Grade Distribution',
+                        content: `Most of your assignments (${mostCommonCount} out of ${assignmentPercentages.length}) earned C grades. Consider targeted studying to improve.`,
+                        type: 'neutral'
+                    });
+                } else {
+                    insights.push({
+                        title: 'Grade Distribution',
+                        content: `Most of your assignments (${mostCommonCount} out of ${assignmentPercentages.length}) earned ${mostCommonGrade} grades. Consider getting additional help to improve your scores.`,
+                        type: 'negative'
+                    });
+                }
+            }
+            
+            // Add more insights here...
+            
+            // Display insights
+            if (insights.length === 0) {
+                insightsContainer.innerHTML = '<p>Add more varied assignments to get personalized insights about your performance.</p>';
+                return;
+            }
+            
+            // Limit to 3 most relevant insights
+            const displayInsights = insights.slice(0, 3);
+            
+            displayInsights.forEach(insight => {
+                let borderColor = 'var(--accent-color)';
+                if (insight.type === 'positive') borderColor = 'var(--success-color)';
+                if (insight.type === 'negative') borderColor = 'var(--error-color)';
+                
+                const insightCard = document.createElement('div');
+                insightCard.className = 'insight-card';
+                insightCard.style.borderLeftColor = borderColor;
+                
+                insightCard.innerHTML = `
+                    <div class="insight-title">${insight.title}</div>
+                    <p style="margin: 5px 0;">${insight.content}</p>
+                `;
+                
+                insightsContainer.appendChild(insightCard);
+            });
+        }
+        
+        function displayPersonalBests(classIndex) {
+            const personalBestsContainer = document.getElementById('personal-bests');
+            personalBestsContainer.innerHTML = '';
+            
+            // Filter for this class
+            const classBests = personalBests.filter(pb => pb.classId === classIndex);
+            
+            if (classBests.length === 0) {
+                personalBestsContainer.innerHTML = '<p>Complete more assignments to unlock your personal bests!</p>';
+                return;
+            }
+            
+            // Display top 3 personal bests
+            const displayBests = classBests.slice(0, 3);
+            
+            displayBests.forEach(best => {
+                const bestCard = document.createElement('div');
+                bestCard.className = 'personal-best';
+                
+                bestCard.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 5px;">${best.description}</div>
+                    <div>${best.value.toFixed(1)}%</div>
+                `;
+                
+                personalBestsContainer.appendChild(bestCard);
+            });
         }
 
         function getLetterGrade(percentage) {
@@ -1446,31 +2680,52 @@
 
         function getPercentageFromGPA(gpa) {
             // Approximate midpoints for display
+            // Using the updated 4.33 scale
+            
+            // Handle exact matches
             if (gpa === 4.33) return 98;    // A+
             if (gpa === 4.0) return 94;     // A
-            if (gpa === 3.67) return 90;    // A-
-            if (gpa === 3.33) return 87;    // B+
-            if (gpa === 3.0) return 84;     // B
-            if (gpa === 2.67) return 80;    // B-
-            if (gpa === 2.33) return 77;    // C+
-            if (gpa === 2.0) return 74;     // C
-            if (gpa === 1.67) return 70;    // C-
-            if (gpa === 1.0) return 65;     // D
-            return 60;                      // F
+            if (gpa === 3.67) return 91;    // A-
+            if (gpa === 3.33) return 88;    // B+
+            if (gpa === 3.0) return 85;     // B
+            if (gpa === 2.67) return 81;    // B-
+            if (gpa === 2.33) return 78;    // C+
+            if (gpa === 2.0) return 75;     // C
+            if (gpa === 1.67) return 71;    // C-
+            if (gpa === 1.0) return 67;     // D
+            if (gpa === 0.0) return 60;     // F
+            
+            // Handle intermediate values
+            if (gpa > 4.0) return 94 + (gpa - 4.0) * (98 - 94) / (4.33 - 4.0);
+            if (gpa > 3.67) return 91 + (gpa - 3.67) * (94 - 91) / (4.0 - 3.67);
+            if (gpa > 3.33) return 88 + (gpa - 3.33) * (91 - 88) / (3.67 - 3.33);
+            if (gpa > 3.0) return 85 + (gpa - 3.0) * (88 - 85) / (3.33 - 3.0);
+            if (gpa > 2.67) return 81 + (gpa - 2.67) * (85 - 81) / (3.0 - 2.67);
+            if (gpa > 2.33) return 78 + (gpa - 2.33) * (81 - 78) / (2.67 - 2.33);
+            if (gpa > 2.0) return 75 + (gpa - 2.0) * (78 - 75) / (2.33 - 2.0);
+            if (gpa > 1.67) return 71 + (gpa - 1.67) * (75 - 71) / (2.0 - 1.67);
+            if (gpa > 1.0) return 67 + (gpa - 1.0) * (71 - 67) / (1.67 - 1.0);
+            
+            // If GPA is between 0 and 1.0
+            if (gpa > 0) return 60 + gpa * (67 - 60) / 1.0;
+            
+            return 60; // Default for F
         }
 
         function getLetterGradeFromGPA(gpa) {
             gpa = Number(gpa);
-            if (gpa === 4.33) return 'A+';
-            if (gpa === 4.0) return 'A';
-            if (gpa === 3.67) return 'A-';
-            if (gpa === 3.33) return 'B+';
-            if (gpa === 3.0) return 'B';
-            if (gpa === 2.67) return 'B-';
-            if (gpa === 2.33) return 'C+';
-            if (gpa === 2.0) return 'C';
-            if (gpa === 1.67) return 'C-';
-            if (gpa === 1.0) return 'D';
+            
+            // Handle ranges instead of exact values
+            if (gpa >= 4.33) return 'A+';
+            if (gpa >= 4.0) return 'A';
+            if (gpa >= 3.67) return 'A-';
+            if (gpa >= 3.33) return 'B+';
+            if (gpa >= 3.0) return 'B';
+            if (gpa >= 2.67) return 'B-';
+            if (gpa >= 2.33) return 'C+';
+            if (gpa >= 2.0) return 'C';
+            if (gpa >= 1.67) return 'C-';
+            if (gpa >= 1.0) return 'D';
             return 'F';
         }
 
@@ -1613,15 +2868,24 @@
                     <div id="semester-list"></div>
                     <button class="button" onclick="addSemester()">Add Semester</button>
                     <label style="display: block; margin-top: 15px;">
-                        <input type="checkbox" id="include-current-semester" checked onchange="calculateCumulativeGPA()"> Include Current Semester in Cumulative GPA
+                        <input type="checkbox" id="include-current-semester" onchange="calculateCumulativeGPA()"> Include Current Semester in Cumulative GPA
                     </label>
                 </section>
                 <section id="cumulative-gpa-summary"></section>
+                <section>
+                    <h3>Course Comparison</h3>
+                    <p>Compare your performance across different courses to identify strengths and areas for improvement.</p>
+                    <div id="course-comparison" class="course-comparison"></div>
+                </section>
             `;
-
+            
+            // Remove active class from sidebar
+            document.querySelectorAll('#class-list li').forEach(el => el.classList.remove('active'));
+            
             renderSemesters();
             calculateCumulativeGPA();
-        }
+        } // This is the closing bracket for renderGPACalculator
+
 
         function addSemester() {
             const semesterDiv = document.createElement('div');
@@ -1898,7 +3162,12 @@
             let totalCredits = 0;
             let totalPercentagePoints = 0;
             const cumulativeGPADiv = document.getElementById('cumulative-gpa-summary');
+            const courseComparisonDiv = document.getElementById('course-comparison');
             cumulativeGPADiv.innerHTML = '';
+            courseComparisonDiv.innerHTML = '';
+            
+            // Arrays to store all class data for course comparison
+            let allClasses = [];
 
             const includeCurrentSemester = document.getElementById('include-current-semester') ? document.getElementById('include-current-semester').checked : true;
 
@@ -1913,6 +3182,16 @@
                     semesterCredits += cls.credits;
                     const percentage = getPercentageFromGPA(numericGPA);
                     semesterPercentagePoints += percentage * cls.credits;
+                    
+                    // Add to allClasses for comparison
+                    allClasses.push({
+                        name: cls.name,
+                        semester: semester.name,
+                        gpa: numericGPA,
+                        percentage: percentage,
+                        credits: cls.credits,
+                        letterGrade: cls.letterGrade
+                    });
                 });
 
                 totalQualityPoints += semesterQualityPoints;
@@ -1937,7 +3216,7 @@
                 else gradeClass = 'grade-f';
 
                 cumulativeGPADiv.innerHTML += `
-                    <div style="margin-bottom: 10px;">
+                    <div style="margin-bottom: 10px; padding: 10px; background: #1e1e1e; border-radius: 6px;">
                         <strong>${semester.name} GPA:</strong> 
                         <span class="${gradeClass}">${averageSemesterGPA}</span>, 
                         Percentage: ${averageSemesterPercentage}%
@@ -2030,10 +3309,123 @@
             else finalGradeClass = 'grade-f';
             
             cumulativeGPADiv.innerHTML += `
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #444;">
-                    <h3>Cumulative GPA: <span class="${finalGradeClass}">${cumulativeGPA}</span>, Percentage: ${cumulativePercentage}%</h3>
+                <div style="margin-top: 20px; padding: 15px; background: #1e1e1e; border-radius: 8px; text-align: center;">
+                    <h3>Cumulative GPA</h3>
+                    <div class="${finalGradeClass}" style="font-size: 36px; font-weight: bold; margin: 10px 0;">${cumulativeGPA}</div>
+                    <div>Percentage: ${cumulativePercentage}%</div>
                 </div>
             `;
+            
+            // Current Semester Classes
+            if (includeCurrentSemester) {
+                classes.forEach(cls => {
+                    let totalWeightedScore = 0;
+                    let totalWeights = 0;
+                    
+                    cls.categories.forEach((cat, index) => {
+                        const grades = cls.assignments
+                            .filter(a => 
+                                a.categoryIndex === index && 
+                                !a.exclude && 
+                                !isAssignmentDropped(cls, index, cls.assignments.indexOf(a)) && 
+                                a.score !== null && 
+                                a.total !== null
+                            )
+                            .map(a => (a.score / a.total) * 100);
+                        
+                        if (grades.length > 0) {
+                            const average = grades.reduce((a, b) => a + b, 0) / grades.length;
+                            totalWeightedScore += (average * cat.weight);
+                            totalWeights += cat.weight;
+                        }
+                    });
+                    
+                    if (totalWeights > 0) {
+                        const finalGrade = (totalWeightedScore / totalWeights);
+                        const gpa = getGPA(finalGrade);
+                        
+                        // Add to allClasses for comparison
+                        allClasses.push({
+                            name: cls.name,
+                            semester: 'Current Semester',
+                            gpa: gpa,
+                            percentage: finalGrade,
+                            credits: cls.credits,
+                            letterGrade: getLetterGrade(finalGrade)
+                        });
+                    }
+                });
+            }
+            
+            // Course Comparison Dashboard
+            if (allClasses.length > 0) {
+                // Sort by GPA (best to worst)
+                allClasses.sort((a, b) => b.gpa - a.gpa);
+                
+                allClasses.forEach(cls => {
+                    // Determine grade class for coloring
+                    let gradeClass = '';
+                    if (cls.gpa >= 4.33) gradeClass = 'grade-a-plus';
+                    else if (cls.gpa >= 4.0) gradeClass = 'grade-a';
+                    else if (cls.gpa >= 3.67) gradeClass = 'grade-a-minus';
+                    else if (cls.gpa >= 3.33) gradeClass = 'grade-b-plus';
+                    else if (cls.gpa >= 3.0) gradeClass = 'grade-b';
+                    else if (cls.gpa >= 2.67) gradeClass = 'grade-b-minus';
+                    else if (cls.gpa >= 2.33) gradeClass = 'grade-c-plus';
+                    else if (cls.gpa >= 2.0) gradeClass = 'grade-c';
+                    else if (cls.gpa >= 1.67) gradeClass = 'grade-c-minus';
+                    else if (cls.gpa >= 1.0) gradeClass = 'grade-d';
+                    else gradeClass = 'grade-f';
+                    
+                    const courseCard = document.createElement('div');
+                    courseCard.className = 'course-card';
+                    
+                    // Progress bar width based on GPA (0-4.33 scale)
+                    const progressWidth = (cls.gpa / 4.33) * 100;
+                    
+                    // Add comparison metrics
+                    let comparisonMetric = '';
+                    let rank = null;
+                    
+                    if (allClasses.length > 1) {
+                        // Find rank of this class
+                        rank = allClasses.findIndex(c => c === cls) + 1;
+                        const percentile = Math.round((allClasses.length - rank + 1) / allClasses.length * 100);
+                        
+                        // Calculate difference from average
+                        const avgGPA = allClasses.reduce((sum, c) => sum + c.gpa, 0) / allClasses.length;
+                        const diffFromAvg = cls.gpa - avgGPA;
+                        
+                        if (Math.abs(diffFromAvg) > 0.2) {
+                            comparisonMetric = `<div style="margin-top: 5px; font-size: 12px; ${diffFromAvg > 0 ? 'color: #4caf50' : 'color: #f44336'}">
+                                ${diffFromAvg > 0 ? '▲' : '▼'} 
+                                ${Math.abs(diffFromAvg).toFixed(2)} points from average
+                            </div>`;
+                        }
+                    }
+                    
+                    courseCard.innerHTML = `
+                        <div class="credit-badge">${cls.credits} credits</div>
+                        <div class="course-name">${cls.name}</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">${cls.semester}</div>
+                        <div class="${gradeClass}" style="font-size: 20px; font-weight: bold; margin-bottom: 8px;">
+                            ${cls.letterGrade} (${cls.gpa.toFixed(2)})
+                        </div>
+                        <div style="width: 100%; background: #333; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${progressWidth}%; background: var(--accent-color); height: 100%; transition: width 0.5s ease;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px;">
+                            <span>${cls.percentage.toFixed(1)}%</span>
+                            <span>${rank ? 'Rank: ' + rank + ' of ' + allClasses.length : ''}</span>
+                        </div>
+                        ${comparisonMetric}
+                    `;
+                    
+                    courseComparisonDiv.appendChild(courseCard);
+                });
+            } else {
+                courseComparisonDiv.innerHTML = '<p>Add courses to see your performance comparison.</p>';
+            }
         }
 
         document.getElementById('add-class-btn').onclick = addClass;
