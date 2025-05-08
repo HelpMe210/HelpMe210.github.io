@@ -960,8 +960,25 @@
         async function saveData() {
             if (!dataLoaded || !docRef) return;
             try {
-                // Record snapshot for grade history when saving
-                recordGradeSnapshot("Manual Save");
+                // Record snapshot for grade history when saving - but ONLY if there's a real grade change
+                // Don't create "Manual Save" entries unless something actually changed
+                let shouldRecord = true;
+                
+                // Check if there's a recent "Manual Save" entry within the last few seconds
+                if (gradeHistory && gradeHistory.length > 0) {
+                    const recentManualSaves = gradeHistory.filter(entry => 
+                        entry.eventType === "Manual Save" && 
+                        (new Date() - new Date(entry.timestamp)) < 5000); // within 5 seconds
+                    
+                    if (recentManualSaves.length > 0) {
+                        shouldRecord = false; // Skip recording for rapid consecutive saves
+                    }
+                }
+                
+                if (shouldRecord) {
+                    recordGradeSnapshot("Manual Save");
+                }
+                
                 await docRef.set({ 
                     classes, 
                     semesters,
@@ -1679,7 +1696,37 @@
             const tbody = document.createElement('tbody');
             table.appendChild(tbody);
 
-            cls.assignments.forEach((assignment, index) => {
+            // Sort assignments by date added (newest first)
+            const sortedAssignments = [...cls.assignments].sort((a, b) => {
+                // Use dateAdded if available, otherwise fall back to index
+                const dateA = a.dateAdded ? new Date(a.dateAdded) : null;
+                const dateB = b.dateAdded ? new Date(b.dateAdded) : null;
+                
+                // If both have dates, compare them (newest first)
+                if (dateA && dateB) {
+                    return dateB - dateA;
+                }
+                // If only one has a date, the one with a date is "newer"
+                else if (dateA) {
+                    return -1;
+                }
+                else if (dateB) {
+                    return 1;
+                }
+                // If neither has a date, keep original order (but reversed)
+                else {
+                    return cls.assignments.indexOf(b) - cls.assignments.indexOf(a);
+                }
+            });
+
+            // Create a mapping from sorted indices back to original indices
+            const originalIndices = sortedAssignments.map(assignment => 
+                cls.assignments.indexOf(assignment)
+            );
+
+            sortedAssignments.forEach((assignment, sortedIndex) => {
+                const index = originalIndices[sortedIndex]; // Original index in cls.assignments
+                
                 // Ensure the categoryIndex is valid
                 if (assignment.categoryIndex >= cls.categories.length) {
                     assignment.categoryIndex = 0; // Reset to first category if invalid
@@ -1723,8 +1770,15 @@
                     statusLabel = '<span class="status-label status-dropped">Dropped</span>';
                 }
 
+                // Display the date if available
+                let dateInfo = '';
+                if (assignment.dateAdded) {
+                    const date = new Date(assignment.dateAdded);
+                    dateInfo = `<span style="font-size: 10px; color: var(--text-muted);">${date.toLocaleDateString()}</span>`;
+                }
+
                 tr.innerHTML = `
-                    <td>${assignment.name} ${statusLabel}</td>
+                    <td>${assignment.name} ${statusLabel} ${dateInfo}</td>
                     <td>${catName}</td>
                     <td>${assignment.score === null ? '—' : assignment.score}</td>
                     <td>${assignment.total === null ? '—' : assignment.total}</td>
@@ -2257,10 +2311,27 @@
             // Extract data for the chart
             const labels = filteredHistory.map(entry => {
                 const date = new Date(entry.timestamp);
-                return date.toLocaleDateString();
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             });
             
             const gradeData = filteredHistory.map(entry => entry.grade);
+            
+            // Find min and max grades to set better scale
+            let minGrade = Math.min(...gradeData);
+            let maxGrade = Math.max(...gradeData);
+            
+            // Narrow the range to focus on changes (±5 points from min/max, but at least 10 point range)
+            const gradeRange = maxGrade - minGrade;
+            if (gradeRange < 10) {
+                // Center the range if it's too small
+                const midPoint = (minGrade + maxGrade) / 2;
+                minGrade = Math.max(0, midPoint - 5);
+                maxGrade = Math.min(100, midPoint + 5);
+            } else {
+                // Just add small padding
+                minGrade = Math.max(0, minGrade - 2);
+                maxGrade = Math.min(100, maxGrade + 2);
+            }
             
             // Destroy existing chart if there is one
             if (gradeChart) {
@@ -2340,15 +2411,17 @@
                     scales: {
                         y: {
                             beginAtZero: false,
-                            min: Math.max(0, Math.min(...gradeData) - 5),
-                            max: Math.min(100, Math.max(...gradeData) + 5),
+                            min: minGrade,
+                            max: maxGrade,
                             grid: {
                                 color: 'rgba(255, 255, 255, 0.1)'
                             },
                             ticks: {
+                                // Limit to 1 decimal place maximum
                                 callback: function(value) {
-                                    return value + '%';
-                                }
+                                    return parseFloat(value).toFixed(1) + '%';
+                                },
+                                stepSize: Math.ceil((maxGrade - minGrade) / 5) // About 5 steps on the axis
                             }
                         },
                         x: {
@@ -2886,6 +2959,9 @@
             calculateCumulativeGPA();
         } // This is the closing bracket for renderGPACalculator
 
+            renderSemesters();
+            calculateCumulativeGPA();
+        }
 
         function addSemester() {
             const semesterDiv = document.createElement('div');
