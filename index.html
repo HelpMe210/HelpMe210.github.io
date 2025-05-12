@@ -783,30 +783,37 @@
         let gradeChart = null;
 
         // Mobile menu toggle
-        document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.add('active');
-        });
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.add('active');
+            });
 
-        document.getElementById('mobile-menu-close').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.remove('active');
-        });
-
-        // Hide sidebar when clicking on content area in mobile view
-        document.getElementById('content').addEventListener('click', function() {
-            if(window.innerWidth <= 600) {
+            document.getElementById('mobile-menu-close').addEventListener('click', function() {
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.remove('active');
-            }
-        });
-        
-        // Close sidebar when a class is selected on mobile
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('#class-list li') && window.innerWidth <= 600) {
-                const sidebar = document.getElementById('sidebar');
-                sidebar.classList.remove('active');
-            }
+            });
+
+            // Hide sidebar when clicking on content area in mobile view
+            document.getElementById('content').addEventListener('click', function() {
+                if(window.innerWidth <= 600) {
+                    const sidebar = document.getElementById('sidebar');
+                    sidebar.classList.remove('active');
+                }
+            });
+            
+            // Close sidebar when a class is selected on mobile
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#class-list li') && window.innerWidth <= 600) {
+                    const sidebar = document.getElementById('sidebar');
+                    sidebar.classList.remove('active');
+                }
+            });
+            
+            // Add class button event listener
+            document.getElementById('add-class-btn').addEventListener('click', function() {
+                addClass();
+            });
         });
 
         auth.onAuthStateChanged(async user => {
@@ -2298,140 +2305,177 @@
         }
         
         function renderGradeHistory(classIndex) {
-            const filteredHistory = gradeHistory.filter(entry => entry.classId === classIndex);
+            // Get the container element
+            const chartContainer = document.querySelector('.chart-container');
             
-            if (filteredHistory.length < 1) {
-                document.querySelector('.chart-container').innerHTML = '<p>No grade data to display yet. Add assignments to see your progress over time.</p>';
-                return;
-            }
-            
-            // Sort by timestamp
-            filteredHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            // Extract data for the chart
-            const labels = filteredHistory.map(entry => {
-                const date = new Date(entry.timestamp);
-                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            });
-            
-            const gradeData = filteredHistory.map(entry => entry.grade);
-            
-            // Find min and max grades to set better scale
-            let minGrade = Math.min(...gradeData);
-            let maxGrade = Math.max(...gradeData);
-            
-            // Narrow the range to focus on changes (±5 points from min/max, but at least 10 point range)
-            const gradeRange = maxGrade - minGrade;
-            if (gradeRange < 10) {
-                // Center the range if it's too small
-                const midPoint = (minGrade + maxGrade) / 2;
-                minGrade = Math.max(0, midPoint - 5);
-                maxGrade = Math.min(100, midPoint + 5);
-            } else {
-                // Just add small padding
-                minGrade = Math.max(0, minGrade - 2);
-                maxGrade = Math.min(100, maxGrade + 2);
-            }
-            
-            // Destroy existing chart if there is one
-            if (gradeChart) {
-                gradeChart.destroy();
-            }
-            
-            // Handle single data point case - add dummy point at beginning
-            if (filteredHistory.length === 1) {
-                // Add a starting point slightly lower than the first grade
-                const startGrade = Math.max(0, gradeData[0] - 5);
-                const startDate = new Date(filteredHistory[0].timestamp);
-                startDate.setDate(startDate.getDate() - 7); // One week before
+            try {
+                // Clear any existing content
+                chartContainer.innerHTML = '<canvas id="gradeHistoryChart"></canvas>';
                 
-                // Insert at beginning
-                labels.unshift(startDate.toLocaleDateString());
-                gradeData.unshift(startGrade);
-            }
-            
-            // Create the chart
-            const ctx = document.getElementById('gradeHistoryChart').getContext('2d');
-            gradeChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Grade Percentage',
-                        data: gradeData,
-                        backgroundColor: 'rgba(66, 133, 244, 0.2)',
-                        borderColor: 'rgba(66, 133, 244, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        pointBackgroundColor: 'rgba(66, 133, 244, 1)',
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    animation: {
-                        duration: 1000, // Animation duration in milliseconds
-                        easing: 'easeOutQuart' // Easing function
+                // Filter history entries for this class
+                const filteredHistory = gradeHistory.filter(entry => entry.classId === classIndex);
+                
+                if (filteredHistory.length < 1) {
+                    chartContainer.innerHTML = '<p>No grade data to display yet. Add assignments to see your progress over time.</p>';
+                    return;
+                }
+                
+                // Remove duplicate entries (same grade, close timestamps)
+                const uniqueHistory = [];
+                filteredHistory.forEach(entry => {
+                    // Check if there's a very similar entry already included
+                    const similarEntry = uniqueHistory.find(e => 
+                        Math.abs(e.grade - entry.grade) < 0.001 && // Virtually identical grade
+                        Math.abs(new Date(e.timestamp) - new Date(entry.timestamp)) < 5000 // Within 5 seconds
+                    );
+                    
+                    if (!similarEntry) {
+                        uniqueHistory.push(entry);
+                    }
+                });
+                
+                // Sort by timestamp 
+                uniqueHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                
+                // Prepare data for the chart
+                const data = [];
+                uniqueHistory.forEach(entry => {
+                    const date = new Date(entry.timestamp);
+                    data.push({
+                        x: date,
+                        y: entry.grade,
+                        event: entry.eventType,
+                        details: entry.details || {}
+                    });
+                });
+                
+                // Always include a minimum range
+                let minGrade = Math.min(...data.map(d => d.y));
+                let maxGrade = Math.max(...data.map(d => d.y));
+                
+                // Set a reasonable range - ensure at least 5 point spread, centered on the data
+                const range = maxGrade - minGrade;
+                if (range < 5) {
+                    const avg = (minGrade + maxGrade) / 2;
+                    minGrade = Math.max(0, avg - 3);
+                    maxGrade = Math.min(100, avg + 3);
+                } else {
+                    // Add some padding around the data
+                    minGrade = Math.max(0, minGrade - 1);
+                    maxGrade = Math.min(100, maxGrade + 1);
+                }
+                
+                // Get the canvas context
+                const ctx = document.getElementById('gradeHistoryChart').getContext('2d');
+                
+                // Destroy existing chart if it exists
+                if (window.gradeChart) {
+                    window.gradeChart.destroy();
+                }
+                
+                // Create new chart
+                window.gradeChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Grade History',
+                            data: data,
+                            backgroundColor: 'rgba(66, 133, 244, 0.2)',
+                            borderColor: 'rgba(66, 133, 244, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: function(context) {
+                                const index = context.dataIndex;
+                                const value = context.dataset.data[index];
+                                if (value.event === 'New Assignment') {
+                                    return 'rgba(76, 175, 80, 1)'; // Green for new assignments
+                                } else if (value.event === 'Updated Assignment') {
+                                    return 'rgba(255, 152, 0, 1)'; // Orange for updates
+                                } else if (value.event === 'Deleted Assignment') {
+                                    return 'rgba(244, 67, 54, 1)'; // Red for deletions
+                                }
+                                return 'rgba(66, 133, 244, 1)'; // Default blue
+                            },
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }]
                     },
-                    plugins: {
-                        legend: {
-                            display: false
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        animation: {
+                            duration: 1000
                         },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    // Skip the dummy point we added
-                                    if (filteredHistory.length === 1 && context.dataIndex === 0) {
-                                        return 'Starting point';
-                                    }
-                                    
-                                    const index = filteredHistory.length === 1 ? 0 : context.dataIndex;
-                                    const historyIndex = Math.min(index, filteredHistory.length - 1);
-                                    const event = filteredHistory[historyIndex].eventType;
-                                    const details = filteredHistory[historyIndex].details;
-                                    let tooltipText = `Event: ${event}`;
-                                    
-                                    if (details && Object.keys(details).length > 0) {
-                                        if (details.assignmentName) {
-                                            tooltipText += `\nAssignment: ${details.assignmentName}`;
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        const item = tooltipItems[0];
+                                        const data = item.dataset.data[item.dataIndex];
+                                        const date = new Date(data.x);
+                                        return date.toLocaleString();
+                                    },
+                                    label: function(context) {
+                                        const data = context.dataset.data[context.dataIndex];
+                                        return `Grade: ${data.y.toFixed(2)}%`;
+                                    },
+                                    afterLabel: function(context) {
+                                        const data = context.dataset.data[context.dataIndex];
+                                        let result = `Event: ${data.event}`;
+                                        
+                                        if (data.details && Object.keys(data.details).length > 0) {
+                                            if (data.details.assignmentName) {
+                                                result += `\nAssignment: ${data.details.assignmentName}`;
+                                            }
+                                            if (data.details.score !== undefined && data.details.total !== undefined) {
+                                                result += `\nScore: ${data.details.score}/${data.details.total}`;
+                                            }
                                         }
-                                        if (details.score !== undefined && details.total !== undefined) {
-                                            tooltipText += `\nScore: ${details.score}/${details.total}`;
-                                        }
+                                        
+                                        return result;
                                     }
-                                    
-                                    return tooltipText;
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    displayFormats: {
+                                        day: 'MMM d'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                min: minGrade,
+                                max: maxGrade,
+                                title: {
+                                    display: true,
+                                    text: 'Grade (%)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toFixed(1) + '%';
+                                    }
                                 }
                             }
                         }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: minGrade,
-                            max: maxGrade,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                // Limit to 1 decimal place maximum
-                                callback: function(value) {
-                                    return parseFloat(value).toFixed(1) + '%';
-                                },
-                                stepSize: Math.ceil((maxGrade - minGrade) / 5) // About 5 steps on the axis
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            }
-                        }
                     }
-                }
-            });
+                });
+                
+            } catch (error) {
+                console.error("Error rendering grade history chart:", error);
+                chartContainer.innerHTML = '<p>Unable to display grade history chart. Please try refreshing the page.</p>';
+            }
         }
         
         function generateInsights(classIndex) {
@@ -2961,7 +3005,7 @@
 
             renderSemesters();
             calculateCumulativeGPA();
-        
+        }
 
         function addSemester() {
             const semesterDiv = document.createElement('div');
