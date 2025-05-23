@@ -641,6 +641,9 @@
                 flex: 0 0 auto !important;
                 width: auto !important;
             }
+            .drag-handle { cursor: move; margin-left: 8px; }
+            tr.drag-over { outline: 2px dashed var(--accent-color); }
+            tr.dragging { opacity: 0.5; }
             
             /* Make tables responsive on mobile */
             table, thead, tbody, th, td, tr {
@@ -1699,7 +1702,6 @@
                 score: score,
                 total: total,
                 exclude: exclude,
-                dateAdded: new Date()
             });
             
             // Record grade snapshot when adding new assignment
@@ -1758,37 +1760,8 @@
             const tbody = document.createElement('tbody');
             table.appendChild(tbody);
 
-            // Sort assignments by date added (newest first)
-            const sortedAssignments = [...cls.assignments].sort((a, b) => {
-                // Use dateAdded if available, otherwise fall back to index
-                const dateA = a.dateAdded ? new Date(a.dateAdded) : null;
-                const dateB = b.dateAdded ? new Date(b.dateAdded) : null;
-                
-                // If both have dates, compare them (newest first)
-                if (dateA && dateB) {
-                    return dateB - dateA;
-                }
-                // If only one has a date, the one with a date is "newer"
-                else if (dateA) {
-                    return -1;
-                }
-                else if (dateB) {
-                    return 1;
-                }
-                // If neither has a date, keep original order (but reversed)
-                else {
-                    return cls.assignments.indexOf(b) - cls.assignments.indexOf(a);
-                }
-            });
 
-            // Create a mapping from sorted indices back to original indices
-            const originalIndices = sortedAssignments.map(assignment => 
-                cls.assignments.indexOf(assignment)
-            );
-
-            sortedAssignments.forEach((assignment, sortedIndex) => {
-                const index = originalIndices[sortedIndex]; // Original index in cls.assignments
-                
+            cls.assignments.forEach((assignment, index) => {
                 // Ensure the categoryIndex is valid
                 if (assignment.categoryIndex >= cls.categories.length) {
                     assignment.categoryIndex = 0; // Reset to first category if invalid
@@ -1820,6 +1793,8 @@
 
                 const tr = document.createElement('tr');
                 
+                tr.setAttribute("draggable", "true");
+                tr.dataset.index = index;
                 // Status labels for clarity
                 let statusLabel = '';
                 
@@ -1832,15 +1807,9 @@
                     statusLabel = '<span class="status-label status-dropped">Dropped</span>';
                 }
 
-                // Display the date if available
-                let dateInfo = '';
-                if (assignment.dateAdded) {
-                    const date = new Date(assignment.dateAdded);
-                    dateInfo = `<span style="font-size: 10px; color: var(--text-muted);">${date.toLocaleDateString()}</span>`;
-                }
 
                 tr.innerHTML = `
-                    <td>${assignment.name} ${statusLabel} ${dateInfo}</td>
+                    <td>${assignment.name} ${statusLabel}</td>
                     <td>${catName}</td>
                     <td>${assignment.score === null ? '—' : assignment.score}</td>
                     <td>${assignment.total === null ? '—' : assignment.total}</td>
@@ -1848,11 +1817,37 @@
                     <td class="action-buttons">
                         <button class="button small" onclick="editAssignment(${classIndex}, ${index})">Edit</button>
                         <button class="button accent small" onclick="deleteAssignment(${classIndex}, ${index})">Delete</button>
-                        <button class="button small" onclick="moveAssignmentUp(${classIndex}, ${index})" ${index === 0 ? 'disabled' : ''}>↑</button>
-                        <button class="button small" onclick="moveAssignmentDown(${classIndex}, ${index})" ${index === cls.assignments.length - 1 ? 'disabled' : ''}>↓</button>
+                        <span class="drag-handle">↕</span>
                     </td>
                 `;
                 tbody.appendChild(tr);
+                tr.addEventListener("dragstart", e => {
+                    e.dataTransfer.setData("text/plain", index);
+                    tr.classList.add("dragging");
+                });
+                tr.addEventListener("dragend", () => {
+                    tr.classList.remove("dragging");
+                });
+                tr.addEventListener("dragover", e => {
+                    e.preventDefault();
+                    tr.classList.add("drag-over");
+                });
+                tr.addEventListener("dragleave", () => {
+                    tr.classList.remove("drag-over");
+                });
+                tr.addEventListener("drop", e => {
+                    e.preventDefault();
+                    tr.classList.remove("drag-over");
+                    const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+                    const toIndex = index;
+                    if (isNaN(fromIndex) || fromIndex === toIndex) return;
+                    const moved = cls.assignments.splice(fromIndex, 1)[0];
+                    cls.assignments.splice(toIndex, 0, moved);
+                    saveData().then(() => {
+                        renderAssignments(classIndex);
+                        calculateGrade(classIndex);
+                    });
+                });
             });
             
             assignmentList.appendChild(table);
@@ -1981,84 +1976,6 @@
                 totalWeightedScore,
                 totalWeights
             };
-        }
-
-        async function moveAssignmentUp(classIndex, assignmentIndex) {
-            const cls = classes[classIndex];
-            if (assignmentIndex > 0) {
-                // Grab table rows to animate
-                const tbody = document.querySelector('#assignment-list tbody');
-                const rows = tbody.querySelectorAll('tr');
-                
-                // Apply animations
-                if (rows[assignmentIndex] && rows[assignmentIndex - 1]) {
-                    rows[assignmentIndex].classList.add('move-animation');
-                    rows[assignmentIndex - 1].classList.add('move-animation');
-                    
-                    rows[assignmentIndex].style.transform = 'translateY(-100%)';
-                    rows[assignmentIndex - 1].style.transform = 'translateY(100%)';
-                    
-                    // Wait for animation to complete
-                    setTimeout(() => {
-                        // Reorder in array
-                        const temp = cls.assignments[assignmentIndex];
-                        cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
-                        cls.assignments[assignmentIndex - 1] = temp;
-                        
-                        saveData().then(() => {
-                            renderAssignments(classIndex);
-                            calculateGrade(classIndex);
-                        });
-                    }, 300);
-                } else {
-                    // Fallback without animation
-                    const temp = cls.assignments[assignmentIndex];
-                    cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
-                    cls.assignments[assignmentIndex - 1] = temp;
-                    
-                    await saveData();
-                    renderAssignments(classIndex);
-                }
-            }
-        }
-
-        async function moveAssignmentDown(classIndex, assignmentIndex) {
-            const cls = classes[classIndex];
-            if (assignmentIndex < cls.assignments.length - 1) {
-                // Grab table rows to animate
-                const tbody = document.querySelector('#assignment-list tbody');
-                const rows = tbody.querySelectorAll('tr');
-                
-                // Apply animations
-                if (rows[assignmentIndex] && rows[assignmentIndex + 1]) {
-                    rows[assignmentIndex].classList.add('move-animation');
-                    rows[assignmentIndex + 1].classList.add('move-animation');
-                    
-                    rows[assignmentIndex].style.transform = 'translateY(100%)';
-                    rows[assignmentIndex + 1].style.transform = 'translateY(-100%)';
-                    
-                    // Wait for animation to complete
-                    setTimeout(() => {
-                        // Reorder in array
-                        const temp = cls.assignments[assignmentIndex];
-                        cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
-                        cls.assignments[assignmentIndex + 1] = temp;
-                        
-                        saveData().then(() => {
-                            renderAssignments(classIndex);
-                            calculateGrade(classIndex);
-                        });
-                    }, 300);
-                } else {
-                    // Fallback without animation
-                    const temp = cls.assignments[assignmentIndex];
-                    cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
-                    cls.assignments[assignmentIndex + 1] = temp;
-                    
-                    await saveData();
-                    renderAssignments(classIndex);
-                }
-            }
         }
 
         function editAssignment(classIndex, assignmentIndex) {
@@ -2562,16 +2479,7 @@
                     name: a.name,
                     percentage: (a.score / a.total) * 100,
                     categoryIndex: a.categoryIndex,
-                    dateAdded: a.dateAdded || new Date()
                 };
-            });
-            
-            // Sort by date (using index as proxy if date not available)
-            assignmentPercentages.sort((a, b) => {
-                if (a.dateAdded && b.dateAdded) {
-                    return new Date(a.dateAdded) - new Date(b.dateAdded);
-                }
-                return 0;
             });
             
             // === INSIGHT: Recent Performance Trend ===
