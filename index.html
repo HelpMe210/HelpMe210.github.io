@@ -1978,6 +1978,83 @@
             };
         }
 
+
+            const cls = classes[classIndex];
+            if (assignmentIndex > 0) {
+                // Grab table rows to animate
+                const tbody = document.querySelector('#assignment-list tbody');
+                const rows = tbody.querySelectorAll('tr');
+                
+                // Apply animations
+                if (rows[assignmentIndex] && rows[assignmentIndex - 1]) {
+                    rows[assignmentIndex].classList.add('move-animation');
+                    rows[assignmentIndex - 1].classList.add('move-animation');
+                    
+                    rows[assignmentIndex].style.transform = 'translateY(-100%)';
+                    rows[assignmentIndex - 1].style.transform = 'translateY(100%)';
+                    
+                    // Wait for animation to complete
+                    setTimeout(() => {
+                        // Reorder in array
+                        const temp = cls.assignments[assignmentIndex];
+                        cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
+                        cls.assignments[assignmentIndex - 1] = temp;
+                        
+                        saveData().then(() => {
+                            renderAssignments(classIndex);
+                            calculateGrade(classIndex);
+                        });
+                    }, 300);
+                } else {
+                    // Fallback without animation
+                    const temp = cls.assignments[assignmentIndex];
+                    cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex - 1];
+                    cls.assignments[assignmentIndex - 1] = temp;
+                    
+                    await saveData();
+                    renderAssignments(classIndex);
+                }
+            }
+        }
+
+            const cls = classes[classIndex];
+            if (assignmentIndex < cls.assignments.length - 1) {
+                // Grab table rows to animate
+                const tbody = document.querySelector('#assignment-list tbody');
+                const rows = tbody.querySelectorAll('tr');
+                
+                // Apply animations
+                if (rows[assignmentIndex] && rows[assignmentIndex + 1]) {
+                    rows[assignmentIndex].classList.add('move-animation');
+                    rows[assignmentIndex + 1].classList.add('move-animation');
+                    
+                    rows[assignmentIndex].style.transform = 'translateY(100%)';
+                    rows[assignmentIndex + 1].style.transform = 'translateY(-100%)';
+                    
+                    // Wait for animation to complete
+                    setTimeout(() => {
+                        // Reorder in array
+                        const temp = cls.assignments[assignmentIndex];
+                        cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
+                        cls.assignments[assignmentIndex + 1] = temp;
+                        
+                        saveData().then(() => {
+                            renderAssignments(classIndex);
+                            calculateGrade(classIndex);
+                        });
+                    }, 300);
+                } else {
+                    // Fallback without animation
+                    const temp = cls.assignments[assignmentIndex];
+                    cls.assignments[assignmentIndex] = cls.assignments[assignmentIndex + 1];
+                    cls.assignments[assignmentIndex + 1] = temp;
+                    
+                    await saveData();
+                    renderAssignments(classIndex);
+                }
+            }
+        }
+
         function editAssignment(classIndex, assignmentIndex) {
             const cls = classes[classIndex];
             const assignment = cls.assignments[assignmentIndex];
