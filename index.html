@@ -754,6 +754,7 @@
     
     <!-- Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
     <script>
         // ===== Firebase Initialization =====
@@ -781,6 +782,13 @@
         let personalBests = [];
         // Chart objects
         let gradeChart = null;
+
+        function parseTimestamp(ts) {
+            if (ts instanceof Date) return ts;
+            if (ts && typeof ts.toDate === 'function') return ts.toDate();
+            if (ts && typeof ts === 'object' && 'seconds' in ts) return new Date(ts.seconds * 1000);
+            return new Date(ts);
+        }
 
         // ===== Event Handlers =====
         document.getElementById('add-class-btn').addEventListener('click', function() {
@@ -2381,7 +2389,7 @@
             }
             
             // Sort by timestamp
-            relevantHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            relevantHistory.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
             
             // Clean up the data - remove consecutive duplicates
             const cleanHistory = [];
@@ -2395,300 +2403,101 @@
                 cleanHistory.push(relevantHistory[i]);
             }
             
-            // Build the HTML for the chart ourselves instead of using Chart.js
-            // This gives us much more control over the display
-            
-            chartContainer.innerHTML = '';
-            
-            // Calculate min/max for proper scaling
-            const gradeValues = cleanHistory.map(entry => entry.grade);
-            let minGrade = Math.min(...gradeValues);
-            let maxGrade = Math.max(...gradeValues);
-            
-            // Ensure we have a reasonable range
-            const range = maxGrade - minGrade;
-            if (range < 10) {
-                const midpoint = (minGrade + maxGrade) / 2;
-                minGrade = Math.max(0, midpoint - 5);
-                maxGrade = Math.min(100, midpoint + 5);
-            } else {
-                // Add a bit of padding
-                minGrade = Math.max(0, minGrade - 1);
-                maxGrade = Math.min(100, maxGrade + 1);
+            // ==== Render chart using Chart.js ====
+            const currentGrade = cleanHistory[cleanHistory.length - 1].grade;
+
+            // Reset container to only the canvas
+            chartContainer.innerHTML = '<canvas id="gradeHistoryChart"></canvas>';
+            const chartCtx = document.getElementById('gradeHistoryChart').getContext('2d');
+
+            const labels = cleanHistory.map(e => parseTimestamp(e.timestamp));
+            const data = cleanHistory.map(e => e.grade);
+
+            const maxGrade = Math.max(...data);
+            const minGrade = Math.min(...data);
+            const padding = 2;
+            const yMin = Math.max(0, Math.floor(minGrade - padding));
+            const yMax = Math.min(100, Math.ceil(maxGrade + padding));
+
+            if (gradeChart) {
+                gradeChart.destroy();
             }
-            
-            // Round to nicer values
-            minGrade = Math.floor(minGrade);
-            maxGrade = Math.ceil(maxGrade);
-            
-            // Container for the custom chart
-            const chartWrapper = document.createElement('div');
-            chartWrapper.style.width = '100%';
-            chartWrapper.style.height = '300px';
-            chartWrapper.style.position = 'relative';
-            chartWrapper.style.marginTop = '20px';
-            
-            // Create graph header with key info
+
+            const gradient = chartCtx.createLinearGradient(0, 0, 0, chartContainer.offsetHeight);
+            gradient.addColorStop(0, 'rgba(66,133,244,0.4)');
+            gradient.addColorStop(1, 'rgba(66,133,244,0)');
+
+            gradeChart = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Grade %',
+                        data: data,
+                        borderColor: 'var(--accent-color)',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: (ctx) => ctx.dataIndex === data.length - 1 ? 6 : 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            suggestedMin: yMin,
+                            suggestedMax: yMax,
+                            grid: { color: '#333' },
+                            ticks: { color: 'var(--text-color-light)' },
+                            title: {
+                                display: true,
+                                text: 'Grade %'
+                            }
+                        },
+                        x: {
+                            type: 'time',
+                            grid: { color: '#333' },
+                            ticks: { color: 'var(--text-color-light)' },
+                            time: { tooltipFormat: 'PPpp' },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: function(items) {
+                                    const entry = cleanHistory[items[0].dataIndex];
+                                    const ts = parseTimestamp(entry.timestamp);
+                                    return ts.toLocaleString();
+                                },
+                                label: function(context) {
+                                    const entry = cleanHistory[context.dataIndex];
+                                    let label = `${entry.grade.toFixed(2)}%`;
+                                    if (entry.details && entry.details.assignmentName) {
+                                        label += ` - ${entry.details.assignmentName}`;
+                                    }
+                                    if (entry.eventType) {
+                                        label += ` (${entry.eventType})`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
             const header = document.createElement('div');
-            header.style.marginBottom = '15px';
-            header.style.display = 'flex';
-            header.style.justifyContent = 'space-between';
-            header.style.alignItems = 'center';
-            
-            // Current grade
-            header.innerHTML = `
-                <div>
-                    <span style="font-weight: bold;">Current Grade:</span> 
-                    <span style="font-size: 18px; color: var(--accent-color);">${cleanHistory[cleanHistory.length - 1].grade.toFixed(2)}%</span>
-                </div>
-                <div>
-                    <span style="font-size: 14px; color: var(--text-muted);">
-                        ${cleanHistory.length} data points
-                    </span>
-                </div>
-            `;
-            
-            chartContainer.appendChild(header);
-            
-            // Create y-axis
-            const yAxis = document.createElement('div');
-            yAxis.style.position = 'absolute';
-            yAxis.style.left = '0';
-            yAxis.style.top = '0';
-            yAxis.style.bottom = '20px';
-            yAxis.style.width = '50px';
-            yAxis.style.borderRight = '1px solid #444';
-            
-            const yRange = maxGrade - minGrade;
-            const ySteps = 5; // Number of steps on y-axis
-            const yStepSize = yRange / ySteps;
-            
-            for (let i = 0; i <= ySteps; i++) {
-                const yValue = maxGrade - (i * yStepSize);
-                const yLabel = document.createElement('div');
-                yLabel.style.position = 'absolute';
-                yLabel.style.right = '10px';
-                yLabel.style.top = `${(i * 100) / ySteps}%`;
-                yLabel.style.transform = 'translateY(-50%)';
-                yLabel.style.fontSize = '12px';
-                yLabel.style.color = '#aaa';
-                yLabel.textContent = `${yValue.toFixed(1)}%`;
-                yAxis.appendChild(yLabel);
-                
-                // Add grid line
-                const gridLine = document.createElement('div');
-                gridLine.style.position = 'absolute';
-                gridLine.style.left = '50px';
-                gridLine.style.right = '0';
-                gridLine.style.top = `${(i * 100) / ySteps}%`;
-                gridLine.style.borderTop = '1px dotted #444';
-                gridLine.style.zIndex = '0';
-                chartWrapper.appendChild(gridLine);
-            }
-            
-            // Create plotting area
-            const plotArea = document.createElement('div');
-            plotArea.style.position = 'absolute';
-            plotArea.style.left = '50px';
-            plotArea.style.right = '0';
-            plotArea.style.top = '0';
-            plotArea.style.bottom = '20px';
-            plotArea.style.backgroundColor = 'rgba(66, 133, 244, 0.05)';
-            plotArea.style.overflow = 'hidden';
-            plotArea.style.borderRadius = '4px';
-            plotArea.style.zIndex = '1';
-            
-            // Plot the points and lines
-            const pointsContainer = document.createElement('div');
-            pointsContainer.style.position = 'absolute';
-            pointsContainer.style.left = '0';
-            pointsContainer.style.right = '0';
-            pointsContainer.style.top = '0';
-            pointsContainer.style.bottom = '0';
-            pointsContainer.style.pointerEvents = 'none';
-            pointsContainer.style.zIndex = '2';
-            
-            // SVG for line path
-            const svgNS = "http://www.w3.org/2000/svg";
-            const svg = document.createElementNS(svgNS, "svg");
-            svg.setAttribute("width", "100%");
-            svg.setAttribute("height", "100%");
-            svg.style.position = 'absolute';
-            svg.style.zIndex = '1';
-            svg.style.pointerEvents = 'none';
-            
-            const path = document.createElementNS(svgNS, "path");
-            path.setAttribute("stroke", "var(--accent-color)");
-            path.setAttribute("stroke-width", "2");
-            path.setAttribute("fill", "none");
-            
-            // Create path data
-            let pathData = "M ";
-            let pointsHTML = '';
-            
-            cleanHistory.forEach((entry, index) => {
-                const xPercent = (index / (cleanHistory.length - 1)) * 100;
-                const yPercent = 100 - ((entry.grade - minGrade) / (maxGrade - minGrade)) * 100;
-                
-                // Add point to path
-                pathData += `${xPercent}% ${yPercent}% `;
-                if (index < cleanHistory.length - 1) {
-                    pathData += "L ";
-                }
-                
-                // Create point marker
-                pointsHTML += `
-                    <div class="grade-point" 
-                         data-index="${index}"
-                         style="position: absolute; left: ${xPercent}%; top: ${yPercent}%; 
-                                transform: translate(-50%, -50%); 
-                                width: 8px; height: 8px; 
-                                background-color: var(--accent-color); 
-                                border-radius: 50%;
-                                cursor: pointer;
-                                transition: all 0.2s;
-                                box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);">
-                    </div>
-                `;
-            });
-            
-            path.setAttribute("d", pathData);
-            svg.appendChild(path);
-            
-            // Areas under curve
-            const areaPath = document.createElementNS(svgNS, "path");
-            areaPath.setAttribute("fill", "rgba(66, 133, 244, 0.15)");
-            areaPath.setAttribute("stroke", "none");
-            
-            // Create area path data (close the path to the bottom)
-            let areaPathData = pathData + `L ${100}% ${100}% L ${0}% ${100}% Z`;
-            areaPath.setAttribute("d", areaPathData);
-            
-            // Add area path first (so it's under the line)
-            svg.insertBefore(areaPath, svg.firstChild);
-            
-            // Populate the points container with HTML
-            pointsContainer.innerHTML = pointsHTML;
-            
-            // Add tooltips via event delegation
-            pointsContainer.addEventListener('mouseover', function(e) {
-                if (e.target.classList.contains('grade-point')) {
-                    const index = parseInt(e.target.dataset.index);
-                    const entry = cleanHistory[index];
-                    
-                    // Enhance the point on hover
-                    e.target.style.width = '12px';
-                    e.target.style.height = '12px';
-                    e.target.style.backgroundColor = '#fff';
-                    e.target.style.boxShadow = '0 0 0 3px var(--accent-color)';
-                    
-                    // Create or update tooltip
-                    let tooltip = document.getElementById('grade-tooltip');
-                    if (!tooltip) {
-                        tooltip = document.createElement('div');
-                        tooltip.id = 'grade-tooltip';
-                        tooltip.style.position = 'absolute';
-                        tooltip.style.backgroundColor = '#333';
-                        tooltip.style.color = '#fff';
-                        tooltip.style.padding = '8px 12px';
-                        tooltip.style.borderRadius = '4px';
-                        tooltip.style.fontSize = '12px';
-                        tooltip.style.zIndex = '1000';
-                        tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-                        tooltip.style.pointerEvents = 'none';
-                        document.body.appendChild(tooltip);
-                    }
-                    
-                    let tooltipContent = `<div style="font-weight: bold;">${entry.grade.toFixed(2)}%</div>`;
-                    tooltipContent += `<div>Event: ${entry.eventType}</div>`;
-                    
-                    if (entry.details) {
-                        if (entry.details.assignmentName) {
-                            tooltipContent += `<div>Assignment: ${entry.details.assignmentName}</div>`;
-                        }
-                        if (entry.details.score !== undefined && entry.details.total !== undefined) {
-                            tooltipContent += `<div>Score: ${entry.details.score}/${entry.details.total}</div>`;
-                        }
-                    }
-                    
-                    tooltip.innerHTML = tooltipContent;
-                    
-                    // Position tooltip
-                    const pointRect = e.target.getBoundingClientRect();
-                    tooltip.style.left = `${pointRect.left}px`;
-                    tooltip.style.top = `${pointRect.top - tooltip.offsetHeight - 10}px`;
-                }
-            });
-            
-            pointsContainer.addEventListener('mouseout', function(e) {
-                if (e.target.classList.contains('grade-point')) {
-                    // Reset point appearance
-                    e.target.style.width = '8px';
-                    e.target.style.height = '8px';
-                    e.target.style.backgroundColor = 'var(--accent-color)';
-                    e.target.style.boxShadow = '0 0 0 2px rgba(66, 133, 244, 0.2)';
-                    
-                    // Hide tooltip
-                    const tooltip = document.getElementById('grade-tooltip');
-                    if (tooltip) {
-                        document.body.removeChild(tooltip);
-                    }
-                }
-            });
-            
-            // Create x-axis with just index numbers, not dates
-            const xAxis = document.createElement('div');
-            xAxis.style.position = 'absolute';
-            xAxis.style.left = '50px';
-            xAxis.style.right = '0';
-            xAxis.style.bottom = '0';
-            xAxis.style.height = '20px';
-            xAxis.style.borderTop = '1px solid #444';
-            
-            // Show only entry numbers instead of dates
-            const numLabels = Math.min(5, cleanHistory.length);
-            for (let i = 0; i < numLabels; i++) {
-                const position = i / (numLabels - 1);
-                const index = Math.floor(position * (cleanHistory.length - 1));
-                
-                const xLabel = document.createElement('div');
-                xLabel.style.position = 'absolute';
-                xLabel.style.left = `${position * 100}%`;
-                xLabel.style.top = '2px';
-                xLabel.style.transform = 'translateX(-50%)';
-                xLabel.style.fontSize = '10px';
-                xLabel.style.color = '#aaa';
-                
-                if (numLabels <= 2) {
-                    // If only showing 2 labels, use "Start" and "End"
-                    xLabel.textContent = i === 0 ? 'Start' : 'End';
-                } else {
-                    // Otherwise show point numbers
-                    xLabel.textContent = `#${index+1}`;
-                }
-                
-                xAxis.appendChild(xLabel);
-            }
-            
-            // Assemble all parts of the chart
-            plotArea.appendChild(svg);
-            plotArea.appendChild(pointsContainer);
-            
-            chartWrapper.appendChild(yAxis);
-            chartWrapper.appendChild(plotArea);
-            chartWrapper.appendChild(xAxis);
-            
-            chartContainer.appendChild(chartWrapper);
-            
-            // Add a legend and interactions explanation
-            const legend = document.createElement('div');
-            legend.style.marginTop = '15px';
-            legend.style.textAlign = 'center';
-            legend.style.fontSize = '12px';
-            legend.style.color = '#888';
-            legend.innerHTML = 'Hover over data points to see details. The chart shows your grade progress over time.';
-            
-            chartContainer.appendChild(legend);
+            header.style.marginTop = '10px';
+            header.style.textAlign = 'center';
+            header.innerHTML = `<strong>Current Grade:</strong> <span style="color: var(--accent-color);">${currentGrade.toFixed(2)}%</span>`;
+            chartContainer.prepend(header);
         }
         
         function generateInsights(classIndex) {
