@@ -2426,12 +2426,6 @@
             const yMin = Math.max(0, Math.floor(minGrade - 5));
             const yMax = Math.min(100, Math.ceil(maxGrade + 5));
 
-
-            const minGrade = Math.min(...data);
-            const maxGrade = Math.max(...data);
-            const yMin = Math.max(0, Math.floor(minGrade - 5));
-            const yMax = Math.min(100, Math.ceil(maxGrade + 5));
-
             if (gradeChart) {
                 gradeChart.destroy();
             }
