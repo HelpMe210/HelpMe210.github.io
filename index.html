@@ -754,6 +754,7 @@
     
     <!-- Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
     <script>
         // ===== Firebase Initialization =====
@@ -1041,7 +1042,16 @@
                 gradeHistory = gradeHistory.slice(-100);
             }
         }
-        
+
+        // Helper to parse timestamps stored in various formats
+        function parseTimestamp(ts) {
+            if (ts instanceof Date) return ts;
+            if (ts && typeof ts === 'object' && typeof ts.seconds === 'number') {
+                return new Date(ts.seconds * 1000);
+            }
+            return new Date(ts);
+        }
+
         // Helper function to calculate current grade for a class
         function calculateCurrentGrade(cls) {
             const categoryGrades = {};
@@ -2402,12 +2412,21 @@
             chartContainer.innerHTML = '<canvas id="gradeHistoryChart"></canvas>';
             const ctx = document.getElementById('gradeHistoryChart').getContext('2d');
 
-            const labels = cleanHistory.map((_, i) => i + 1);
+            const labels = cleanHistory.map(e => parseTimestamp(e.timestamp));
             const data = cleanHistory.map(e => e.grade);
+
+            const minGrade = Math.min(...data);
+            const maxGrade = Math.max(...data);
+            const yMin = Math.max(0, Math.floor(minGrade - 5));
+            const yMax = Math.min(100, Math.ceil(maxGrade + 5));
 
             if (gradeChart) {
                 gradeChart.destroy();
             }
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+            gradient.addColorStop(0, 'rgba(66,133,244,0.4)');
+            gradient.addColorStop(1, 'rgba(66,133,244,0)');
 
             gradeChart = new Chart(ctx, {
                 type: 'line',
@@ -2417,10 +2436,10 @@
                         label: 'Grade %',
                         data: data,
                         borderColor: 'var(--accent-color)',
-                        backgroundColor: 'rgba(66,133,244,0.2)',
+                        backgroundColor: gradient,
                         fill: true,
                         tension: 0.3,
-                        pointRadius: 4,
+                        pointRadius: ctx => ctx.dataIndex === data.length - 1 ? 6 : 4,
                         pointHoverRadius: 6
                     }]
                 },
@@ -2429,17 +2448,21 @@
                     maintainAspectRatio: false,
                     scales: {
                         y: {
-                            min: 0,
-                            max: 100,
+                            min: yMin,
+                            max: yMax,
                             title: {
                                 display: true,
                                 text: 'Grade %'
                             }
                         },
                         x: {
+                            type: 'time',
+                            time: {
+                                tooltipFormat: 'PPpp'
+                            },
                             title: {
                                 display: true,
-                                text: 'Entry'
+                                text: 'Timestamp'
                             }
                         }
                     },
@@ -2449,9 +2472,12 @@
                             callbacks: {
                                 label: function(context) {
                                     const entry = cleanHistory[context.dataIndex];
-                                    let label = ` ${entry.grade.toFixed(2)}%`;
+                                    let label = `${entry.grade.toFixed(2)}%`;
                                     if (entry.details && entry.details.assignmentName) {
                                         label += ` - ${entry.details.assignmentName}`;
+                                    }
+                                    if (entry.eventType) {
+                                        label += ` (${entry.eventType})`;
                                     }
                                     return label;
                                 }
