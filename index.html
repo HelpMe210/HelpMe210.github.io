@@ -2426,6 +2426,12 @@
             const yMin = Math.max(0, Math.floor(minGrade - 5));
             const yMax = Math.min(100, Math.ceil(maxGrade + 5));
 
+
+            const minGrade = Math.min(...data);
+            const maxGrade = Math.max(...data);
+            const yMin = Math.max(0, Math.floor(minGrade - 5));
+            const yMax = Math.min(100, Math.ceil(maxGrade + 5));
+
             if (gradeChart) {
                 gradeChart.destroy();
             }
@@ -2450,6 +2456,7 @@
                         pointRadius: ctx => ctx.dataIndex === points.length - 1 ? 6 : 4,
                         pointHoverRadius: 6,
                         spanGaps: true
+
                     }]
                 },
                 options: {
@@ -2470,9 +2477,11 @@
                         y: {
                             min: yMin,
                             max: yMax,
+
                             grid: {
                                 color: '#333'
                             },
+
                             title: {
                                 display: true,
                                 text: 'Grade %'
@@ -2480,16 +2489,19 @@
                         },
                         x: {
                             type: 'time',
+
                             offset: true,
                             grid: {
                                 color: '#333'
                             },
+
                             time: {
                                 tooltipFormat: 'PPpp'
                             },
                             title: {
                                 display: true,
                                 text: 'Date'
+
                             }
                         }
                     },
@@ -3597,3 +3609,4 @@
     </script>
 </body>
 </html>
+
