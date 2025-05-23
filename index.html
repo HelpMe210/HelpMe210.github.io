@@ -3009,6 +3009,9 @@
         }
 
         function getPercentageFromGPA(gpa) {
+            gpa = Number(gpa);
+            if (isNaN(gpa)) return 0;
+
             // Approximate midpoints for display
             // Using the updated 4.33 scale
             
@@ -3186,9 +3189,6 @@
         /*============================
           GPA CALCULATOR
         ============================*/
-        document.getElementById('gpa-calculator-btn').onclick = function() {
-            renderGPACalculator();
-        };
 
         function renderGPACalculator() {
             const content = document.getElementById('content');
@@ -3211,14 +3211,12 @@
             
             // Remove active class from sidebar
             document.querySelectorAll('#class-list li').forEach(el => el.classList.remove('active'));
-            
-            renderSemesters();
-            calculateCumulativeGPA();
-        } // This is the closing bracket for renderGPACalculator
 
+            // Populate existing data
             renderSemesters();
             calculateCumulativeGPA();
-        
+        }
+
 
         function addSemester() {
             const semesterDiv = document.createElement('div');
@@ -3761,7 +3759,6 @@
             }
         }
 
-        document.getElementById('add-class-btn').onclick = addClass;
     </script>
 </body>
 </html>
