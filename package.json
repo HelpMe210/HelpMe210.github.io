@@ -1,0 +1,8 @@
+{
+  "name": "helpmestudent",
+  "version": "1.0.0",
+  "description": "placeholder package",
+  "scripts": {
+    "test": "echo \"No tests\" && exit 0"
+  }
+}
